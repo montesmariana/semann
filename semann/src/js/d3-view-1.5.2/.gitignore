@@ -1,0 +1,18 @@
+# javascript
+node_modules
+/bin
+build
+coverage
+website/static/*.js
+website/static/*.map
+website/static/*.css
+
+# ide
+.idea
+*.sublime-workspace
+
+# files
+*.log
+.env
+.DS_Store
+nav.json

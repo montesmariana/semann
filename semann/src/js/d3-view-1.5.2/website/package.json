@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "rollup -c -w",
+    "reload": "livereload static",
+    "watch": "export NODE_ENV=DEV && npm-run-all --parallel reload serve dev",
+    "prepare": "view-require -c require.config.js && rollup -c",
+    "serve": "nodemon -w siteConfig.js ./node_modules/.bin/d3fluid -- --debug"
+  },
+  "dependencies": {
+    "handlebars": "4.0",
+    "d3-fluid": "0.3"
+  },
+  "devDependencies": {
+    "bootstrap": "4.1",
+    "node-sass": "4.9",
+    "nodemon": "1.18",
+    "npm-run-all": "4.1",
+    "raw-loader": "0.5"
+  }
+}
