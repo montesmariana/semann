@@ -1,5 +1,0 @@
-*.log
-*.lock
-.eslintrc
-test.js
-coverage

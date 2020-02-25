@@ -1,6 +1,0 @@
-globals:
-    describe: true
-    expect: true
-    test: true
-    afterEach: true
-    beforeEach: true
