@@ -24,10 +24,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "semann",
-            "iconUrl" : "src/assets/favicon.ico",
-            "loadingGif" : "src/assets/waitingCat.gif",
-            "setupIcon" : "src/assets/favicon.ico"
+            "name": "semann"
           }
         },
         {
