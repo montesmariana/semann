@@ -62,7 +62,7 @@ function start(msgSource) {
     d3.selectAll("button[name='closeModal']").text(msg["close_modal"]);
     d3.selectAll("button[name='saveChanges']").text(msg["save_changes"]);
 
-    offerVariables(variables, selectedVariables);
+    offerVariables(variables);
 
     $("#uploadVars").on("click", function (e) { e.stopPropagation(); });
     

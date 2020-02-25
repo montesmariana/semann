@@ -1,4 +1,4 @@
-function offerVariables(startingVariables, selected) {
+function offerVariables(startingVariables) {
     const varsMenu = d3.select("#uploadVars");
     
     varsMenu.selectAll("button").remove();
@@ -11,22 +11,25 @@ function offerVariables(startingVariables, selected) {
         .attr("xlink:href", "#")
         // .attr("value", function (d) { return (d.code) })
         .classed('active', function (d) {
-            return (selected.indexOf(d.code) !== -1);
+            return (selectedVariables.indexOf(d.code) !== -1);
         })
         .text(function (d) { return (d.label) })
         .on("click", function (d) {
-            if (selected.indexOf(d.code) === -1) {
-                selected.push(d.code);
+            if (selectedVariables.indexOf(d.code) === -1) {
+                selectedVariables.push(d.code);
+                showAnnotations(d.code);
             } else {
-                selected.splice(selected.indexOf(d.code), 1);
+                selectedVariables.splice(selectedVariables.indexOf(d.code), 1);
+                console.log(selectedVariables);
+                removeAnnotations(d.code);
             }
-            config['variables'] = selected;
+            config['variables'] = selectedVariables;
             d3.select(this).classed('active', function (d) {
-                return (selected.indexOf(d.code) !== -1);
+                return (selectedVariables.indexOf(d.code) !== -1);
             });
-            if (d3.keys(types).length > 0) {
-                showAnnotations();
-            }
+            // if (d3.keys(types).length > 0) {
+            //     showAnnotations();
+            // }
         });
 
     varsMenu.append("div").attr("class", "dropdown-divider");
@@ -34,9 +37,9 @@ function offerVariables(startingVariables, selected) {
         .text(msg['personalized_options'])
         .on("click", otherVars);
 
-    if (d3.keys(types).length > 0) {
-        showAnnotations();
-    }
+    // if (d3.keys(types).length > 0) {
+    //     showAnnotations();
+    // }
 }
 
 function otherVars() {
@@ -104,6 +107,7 @@ function createCategorical() {
             const varName = d3.select("#catTitle").property('value');
             const fname = downloadJSON(setVariable, varName);
             addPersonalizedVariable(varName, setVariable, fname);
+            showAnnotations(varName);
             $("#catModal").modal('hide');
         })
     } else {
@@ -127,6 +131,7 @@ function createCategorical() {
                 const varName = d3.select("#catTitle").property('value');
                 const fname = downloadJSON(setVariable, varName);
                 addPersonalizedVariable(varName, setVariable, fname);
+                showAnnotations(varName);
                 $("#catModal").modal('hide');
             });
     }
@@ -182,6 +187,7 @@ function createNumerical() {
     }).then((result) => {
         if (result.value) {
             addPersonalizedVariable(result.value, 'numerical', "numerical");
+            showAnnotations(result.value);
         }
     });
 }
@@ -205,13 +211,7 @@ function askVars() {
                 }]
             });
             addPersonalizedVariable(result.value, JSON.parse(fs.readFileSync(varFile[0])), varFile[0]);
-            // personalizedVariables[result.value] = JSON.parse(fs.readFileSync(varFile[0]));
-            // config['personalized_variables'].push({
-            //     variable: result.value, path: varFile[0]
-            // });
-            // variables.push({ code: result.value, label: result.value[0].toUpperCase() + result.value.substr(1).toLowerCase() });
-            // selectedVariables.push(result.value);
-            // offerVariables(variables, selectedVariables);
+            showAnnotations(result.value);
         }
     });
 
@@ -229,7 +229,7 @@ function addPersonalizedVariable(name, content, path) {
     variables.push({ code: name, label: name[0].toUpperCase() + name.substr(1).toLowerCase() });
     selectedVariables.push(name);
     console.log(selectedVariables);
-    offerVariables(variables, selectedVariables);
+    offerVariables(variables);
 }
 
 function showConc() {
@@ -363,9 +363,9 @@ function showConc() {
 
     conc.append("hr");
 
-    if (selectedVariables.length > 0) {
-        showAnnotations();
-    }
+    // if (selectedVariables.length > 0) {
+    //     showAnnotations();
+    // }
 
     buttons = d3.select("#" + msg['tab_2']).append("div")
         .attr("class", "row justify-content-center")
@@ -393,57 +393,97 @@ function showConc() {
         });
 }
 
-function showAnnotations() {
-    instructionNumber = 1;
+function showAnnotations(variable) {
 
-    d3.selectAll(".annotationsSection").remove()
-    anns = conc.append("div").attr("class", "annotationsSection");
-    // addVariable('sense');
-    // addConfidence();
-    // addCues();
-    // addComments();
-    // displayNoSense();
-    // ableAnns();
-
-    categVars = selectedVariables.filter(function (x) {
-        return (d3.keys(personalizedVariables).indexOf(x) !== -1 &&
-        personalizedVariables[x] !== 'numerical' &&
-        d3.keys(personalizedVariables[x]).indexOf(type) !== -1);
-    });
-    categVars.forEach(addVariable);
-
-    numVars = selectedVariables.filter(function(x) {
-        return (d3.keys(personalizedVariables).indexOf(x) !== -1 &&
-        personalizedVariables[x] === 'numerical')
-    });
-    numVars.forEach(addNumerical);
-
-    if (selectedVariables.indexOf('confidence') !== -1) {
-        addConfidence();
+    if (conc === undefined) {
+        uploadType();
     }
-    if (selectedVariables.indexOf('cues') !== -1) {
-        addCues();
+    if (selectedVariables.length === 1) {
+        d3.selectAll(".annotationsSection").remove()
+        anns = conc.append("div").attr("class", "annotationsSection");
+    } else {
+        anns = conc.select("div.annotationsSection");
     }
-    if (selectedVariables.indexOf('comments') !== -1) {
-        addComments();
+    console.log(variable);
+
+    switch(variable) {
+        case "confidence":
+            addConfidence();
+            break;
+        case "cues":
+            addCues();
+            break;
+        case "comments":
+            addComments();
+            break;
+        default:
+            personalizedVariables[x] === 'numerical' ? addNumerical(variable) : addVariable(variable);
     }
 }
 
-function writeInstruction(text) {
-    anns.append("p")
+function removeAnnotations(variable) {
+    d3.select("#"+type+"_"+variable).remove();
+    selectedVariables.forEach(function(d) {
+        d3.select("#instNum_"+type+"_"+d)
+            .text(selectedVariables.indexOf(d)+1+".");
+    })
+}
+// function showAnnotations() {
+//     instructionNumber = 1;
+
+//     d3.selectAll(".annotationsSection").remove()
+//     anns = conc.append("div").attr("class", "annotationsSection");
+//     // addVariable('sense');
+//     // addConfidence();
+//     // addCues();
+//     // addComments();
+//     // displayNoSense();
+//     // ableAnns();
+
+//     categVars = selectedVariables.filter(function (x) {
+//         return (d3.keys(personalizedVariables).indexOf(x) !== -1 &&
+//         personalizedVariables[x] !== 'numerical' &&
+//         d3.keys(personalizedVariables[x]).indexOf(type) !== -1);
+//     });
+//     categVars.forEach(addVariable);
+
+//     numVars = selectedVariables.filter(function(x) {
+//         return (d3.keys(personalizedVariables).indexOf(x) !== -1 &&
+//         personalizedVariables[x] === 'numerical')
+//     });
+//     numVars.forEach(addNumerical);
+
+//     if (selectedVariables.indexOf('confidence') !== -1) {
+//         addConfidence();
+//     }
+//     if (selectedVariables.indexOf('cues') !== -1) {
+//         addCues();
+//     }
+//     if (selectedVariables.indexOf('comments') !== -1) {
+//         addComments();
+//     }
+// }
+
+function writeInstruction(text, variable) {
+    const instructionNumber = selectedVariables.indexOf(variable)+1;
+    d3.select("#"+type+"_"+variable).append("p")
         .style('color', '#696969')
-        .html("<strong>" + instructionNumber.toString() + ".</strong> " + text);
-    instructionNumber += 1;
+        .html("<span id='instNum_"+type+"_"+variable+"' style='font-weight:bold;'>" + instructionNumber.toString() + ".</span> " + text);
+    // instructionNumber += 1;
 }
 
 function addNumerical(variable) {
 
-    writeInstruction(msg['instruction_variable'] + variable + '.');
+    const block = anns.append("div").attr("id", type+"_"+variable);
 
-    anns.append("input").attr("type", "number").attr("name", type + "_" + variable);
+    writeInstruction(msg['instruction_variable'] + variable + '.', variable);
+
+    block.append("input").attr("type", "number").attr("name", type + "_" + variable);
+
+    block.append("hr");
 
     $(document).on("change", "input[name='" + type + "_" + variable + "']", function() {
-        var analized = d3.select(this.parentNode.parentNode).attr("token_id");
+        var analized = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         var answer = d3.select(this).property('value');
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
@@ -455,9 +495,11 @@ function addNumerical(variable) {
 
 function addVariable(variable) {
 
-    writeInstruction(msg['instruction_variable'] + variable + ".");
+    const block = anns.append("div").attr("id", type+"_"+variable);
 
-    anns.append("div").attr("class", "row no-gutters justify-content-sm-center")
+    writeInstruction(msg['instruction_variable'] + variable + ".", variable);
+
+    block.append("div").attr("class", "row no-gutters justify-content-sm-center")
         .append("div").attr("class", "btn-group-vertical btn-group-toggle mt-2 btn-block")
         .attr("data-toggle", "buttons")
         .selectAll("label")
@@ -465,7 +507,7 @@ function addVariable(variable) {
         .append("label")
         .attr("class", "btn shadow-md btn btn-outline-secondary btn-sm")
         .classed("active", function (d) {
-            var here = d3.select(this.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+            var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
             // var chosen = hasSense(here, type) && text[type][here][variable] === d.code;
             var chosen = d3.keys(text[type][here]).indexOf(variable) !== -1 && text[type][here][variable] === d.code;
             return (chosen ? true : null);
@@ -479,7 +521,7 @@ function addVariable(variable) {
 
     // Control de results when var changes
     $(document).on('change', 'input[name="' + type + '_' + variable + '"]', function (event) {
-        var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+        var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
         var answer = d3.select(this).attr('value');
         // register data
         if (d3.keys(text[type]).indexOf(analized) === -1) {
@@ -498,17 +540,19 @@ function addVariable(variable) {
         // saveInLS();
     });
 
-    anns.append("hr");
+    block.append("hr");
 }
 
 function addConfidence() {
 
-    writeInstruction(msg['instruction_confidence']);
+    const block = anns.append("div").attr("id", type+"_confidence");
 
-    conf = anns.append("div").attr("class", "row no-gutters justify-content-sm-center")
+    writeInstruction(msg['instruction_confidence'], 'confidence');
+
+    conf = block.append("div").attr("class", "row no-gutters justify-content-sm-center")
         .append("div").attr("id", "confidence")
         .attr("class", "btn-group-toggle")
-        .attr("data-toggle", "buttons")
+        .attr("data-toggle", "buttons");
 
     conf.append("span").attr("class", "px-2")
         .text(msg["confidence_none"]);
@@ -531,7 +575,7 @@ function addConfidence() {
 
     // Control when confidence changes
     $(document).on('change', 'input[name="' + type + '_confidence"]', function (event) {
-        var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+        var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
         var answer = d3.select(this).property('value');
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
@@ -541,14 +585,15 @@ function addConfidence() {
         colorStars();
     });
 
-    anns.append("hr");
+    block.append("hr");
 }
 
 function addCues() {
+    const block = anns.append("div").attr("id", type+"_cues");
 
-    writeInstruction(msg['instruction_cues'])
+    writeInstruction(msg['instruction_cues'], 'cues')
 
-    cues = anns.append("div").attr("class", "row justify-content-center")
+    cues = block.append("div").attr("class", "row justify-content-center")
         .each(function (d) {
             var line = d3.select(this).append('p').attr("class", "text-center"),
                 leftContext = [],
@@ -583,7 +628,7 @@ function addCues() {
                     .data(context).enter()
                     .append("label").attr("class", "btn btn-cue px-1")
                     .classed("active", function (d) {
-                        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr('token_id');
+                        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr('token_id');
                         // var chosen = hasSense(here, type) && text[type][here]['cues'].indexOf(d.index) !== -1;
                         var chosen = d3.keys(text[type][here]).indexOf('cues') !== -1 && text[type][here]['cues'].indexOf(d.index) !== -1;
                         return (chosen ? true : null);
@@ -598,17 +643,19 @@ function addCues() {
         });
 
     // Control of results when the 'cues' change
-    $(document).on("change", "input[name='" + type + counter + "_cues']", function (event) {
-        var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+    $(document).on("change", "input[name='" + type + counter + "_cues']", function () {
+        var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+        console.log(analized);
         var answer = d3.select(this).attr('value');
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
         }
+        console.log(text[type][analized]);
         if (d3.keys(text[type][analized]).indexOf('cues') === -1) {
             text[type][analized]['cues'] = [];
         }
         var cues_list = text[type][analized]['cues'];
-        if (cues_list.indexOf('none') == 0) {
+        if (cues_list.indexOf('none') === 0) {
             cues_list.splice(0, 1);
         }
 
@@ -617,6 +664,8 @@ function addCues() {
         } else { //if you are unclicking
             cues_list.splice(cues_list.indexOf(answer), 1);
         }
+        console.log(cues_list);
+        console.log(text[type]);
 
         updateTargetColor();
         displayReminder();
@@ -624,13 +673,13 @@ function addCues() {
     });
 
     // HERE we add the reminder to add cues if the sense is annotated but there are not cues
-    reminder = anns.append('div')
+    reminder = block.append('div')
         .attr('class', 'alert alert-warning text-center')
         .attr('role', 'alert')
         .html(msg["reminder"]);
 
     // and a confirmation if they have selected 'here'
-    no_cues_conf = anns.append('div')
+    no_cues_conf = block.append('div')
         .attr('class', 'alert alert-success text-center')
         .attr('role', 'alert')
         .html(msg["no_cues_conf"]);
@@ -650,19 +699,20 @@ function addCues() {
             updateTargetColor();
         });
 
-    anns.append("hr");
+    block.append("hr");
 }
 
 function addComments() {
+    const block = anns.append("div").attr("id", type+"_comments");
 
-    writeInstruction(msg['instruction_comments']);
+    writeInstruction(msg['instruction_comments'], 'comments');
 
     // no_sense_message = anns.append('div')
     //     .attr('class', 'alert alert-warning text-center')
     //     .attr('role', 'alert')
     //     .html(msg["no_sense_message"]);
 
-    inputtext = anns.append("div").attr("class", "row")
+    inputtext = block.append("div").attr("class", "row")
         .append("div").attr("class", "col")
         .attr("token_id", function (d) { return (d.id); });
 
@@ -674,13 +724,13 @@ function addComments() {
         .attr("placeholder", msg["comments_placeholder"])
         .attr("aria-label", "Comments")
         .property('value', function () {
-            var here = d3.select(this.parentNode.parentNode).attr("token_id");
+            var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
             return (d3.keys(text[type][here]).indexOf('comments') !== -1 ? text[type][here]['comments'] : null);
         })
 
     // control when comments change
     $(document).on('change', 'input[name="comments"]', function () {
-        var analized = d3.select(this.parentNode.parentNode).attr("token_id");
+        var analized = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         var answer = d3.select(this).property('value');
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
@@ -691,6 +741,8 @@ function addComments() {
         updateTargetColor();
         saveInLS();
     });
+
+    block.append("hr");
 }
 
 function addNoneTag(variable) {
@@ -719,7 +771,7 @@ function updateTargetColor(t) {
 function displayReminder() {
     reminder.style("display", function (d) {
         var wantCues = selectedVariables.indexOf('cues') !== -1;
-        var here = d3.select(this.parentNode.parentNode).attr("token_id");
+        var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         var needCues = d3.keys(text[type]).indexOf(here) === -1 ||
             d3.keys(text[type][here]).indexOf('cues') === -1 ||
             text[type][here]['cues'].length === 0;
@@ -728,7 +780,7 @@ function displayReminder() {
 
     no_cues_conf.style("display", function (d) {
         var wantCues = selectedVariables.indexOf('cues') !== -1;
-        var here = d3.select(this.parentNode.parentNode).attr("token_id");
+        var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         var noCues = d3.keys(text[type]).indexOf(here) !== -1 &&
             d3.keys(text[type][here]).indexOf('cues') !== -1 &&
             text[type][here]['cues'].indexOf('none') === 0;
@@ -738,21 +790,21 @@ function displayReminder() {
 
 function ableAnns() {
     conf.attr("disabled", function() {
-        var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
+        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode).attr("token_id");
         return (hasSense(here, type) ? null : true);
     });
     cues.selectAll("span").attr("disabled", function(d) {
         return(d3.keys(text[type]).indexOf(d.id) > -1 ? null : true);
     });
     cues.selectAll("label").classed("active", function (d) {
-        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr('token_id');
+        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr('token_id');
         var chosen = hasSense(here, type) && text[type][here]['cues'].indexOf(d.index) > -1;
         return (chosen ? true : null);
     })
 
     inputtext.selectAll("input")
         .attr("disabled", function() {
-            var here = d3.select(this.parentNode.parentNode).attr("token_id");
+            var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
             return (hasSense(here, type) ? null : true);
         });
 }
@@ -760,7 +812,7 @@ function ableAnns() {
 // Update display of reminder to comment when sense is 'none'
 function displayNoSense() {
     no_sense_message.style("display", function (d) {
-        var here = d3.select(this.parentNode.parentNode).attr("token_id");
+        var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         return (hasSense(here, type) &&
             text[type][here]['sense'] == msg['no_sense_code'] &&
             d3.keys(text[type][here]).indexOf('comments') == -1 ? 'block' : 'none');
@@ -791,7 +843,7 @@ function checkType() {
 function colorStars() {
     conf.selectAll("label")
         .style("color", function (d) {
-            var here = d3.select(this.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+            var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
             if (!hasSense(here, type) ||
                 d3.keys(text[type][here]).indexOf('confidence') === -1 ||
                 text[type][here]['confidence'] < d) {
@@ -878,7 +930,7 @@ function userOnClick() {
                 variables.push({ code: v['variable'], label: v['variable'][0].toUpperCase() + v['variable'].substr(1).toLowerCase() });
             });
             offerTypes(d3.keys(types));
-            offerVariables(variables, selectedVariables);
+            offerVariables(variables);
 
             console.log(config);
             //   loadConfigFile();
