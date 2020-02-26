@@ -57,7 +57,9 @@
         "define_type" : "For which type?",
         "for_type" : "Create a variable for ",
         "add_type" : "Add type",
-        "add_value" : "Add value"
+        "add_value" : "Add value",
+        "variable_exists" : "This variable name already exists"
+
     },
     "nl" : {
         "title" : "Semantische annotatie",
@@ -116,6 +118,7 @@
         "define_type" : "Voor welke item?",
         "for_type" : "Een variabel creëren voor ",
         "add_type" : "Item toevoegen",
-        "add_value" : "Waarde toevoegen"
+        "add_value" : "Waarde toevoegen",
+        "variable_exists" : "Deze naam is niet beschikbaar"
     }
 }
