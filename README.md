@@ -26,4 +26,4 @@ Developed within the <a href="https://www.arts.kuleuven.be/ling/qlvl/projects/cu
     - Export your annotations and concordances as a tsv file
 
 ## Download
-Installation files <a href="./Windows/">here</a>.
+Installation files <a href="./Windows/">here</a>. You can test the app with the files (concordance: "church.tsv", variable: "church.json") in the "sample_files" directory.

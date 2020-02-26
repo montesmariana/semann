@@ -1,0 +1,20 @@
+{
+    "church": [
+        {
+            "code": "building",
+            "label": "<strong>A building for worship of the (spec. Christian) faith</strong>: <em>a white church on the hill</em>"
+        },
+        {
+            "code": "congregation",
+            "label": "<strong>Community of (Christian) believers with a specific location</strong>: <em>she's a member of my church</em>"
+        },
+        {
+            "code": "organization",
+            "label": "<strong>(Christian) religious organization</strong>: <em>within the Catholic Church</em>"
+        },
+        {
+            "code": "service",
+            "label": "<strong>(Christian) religious service or activity around worship and catechism</strong>: <em>Do you go to church on Sundays?</em>"
+        }
+    ]
+}
