@@ -3,7 +3,7 @@ var counter = 0, instructionNumber, toClassify, viewing;
 var types = {}, announced = {};
 var variables, selectedVariables = [], personalizedVariables = {};
 var categVars, numVars;
-var valuesNum, itemsNum;
+var valuesNum, itemsNum, forms;
 var config = {
     'user' : '',
     'variables' : [],

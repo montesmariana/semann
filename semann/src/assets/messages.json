@@ -109,11 +109,11 @@
         "categorical_option" : "Categorische variabel maken",
         "numerical_option" : "Numerische variabel maken",
         "from_file_option" : "Variabel van bestand uploaden",
-        "close_modal" : "Doorgaan",
+        "close_modal" : "Annuleren",
         "save_changes" : "Opslaan",
         "label" : "Label",
         "value" : "Waarde",
-        "define_type" : "For welke item?",
+        "define_type" : "Voor welke item?",
         "for_type" : "Een variabel creëren voor ",
         "add_type" : "Item toevoegen",
         "add_value" : "Waarde toevoegen"

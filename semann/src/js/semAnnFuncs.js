@@ -68,31 +68,25 @@ function otherVars() {
 function createCategorical() {
     var typesToAnnotate = d3.keys(types).slice();
 
-    d3.select("#catVariableTitle").text(msg["load_variable_title"])
+    d3.select("#catVariableTitle").text(msg["categorical_option"])
     d3.select("#catVariableBody").selectAll("form").remove();
     d3.select("#catVariableBody").selectAll("div").remove();
+    d3.select("#catVariableBody").selectAll("button").remove();
 
     const selectTitle = d3.select("#catVariableBody").append("form")
-    selectTitle.append("label").text(msg["load_variable_title"]);
+        .append("div").attr("class", "form-group");
+    selectTitle.append("label").attr("for", "catTitle")
+        .style("font-weeight", "bold")
+        .text(msg["load_variable_title"]);
     selectTitle.append("input").attr("type", "text")
+        .attr("class", "form-control")
         .attr("id", "catTitle");
 
+    forms = d3.select("#catVariableBody").append("div");
     if (typesToAnnotate.length === 0) {
-        console.log("No types")
         itemsNum = [1];
-        var forms = d3.select("#catVariableBody").append("div");
-
         addTypeForCat(forms, 1);
       
-        d3.select("#catVariableBody").append("button")
-            .attr("type", "button")
-            .attr("class", "btn btn-danger m-2")
-            .html("<i class='fas fa-plus'></i> " + msg["add_type"])
-            .on("click", function() {
-                itemsNum.push(itemsNum[itemsNum.length-1] + 1);
-                addTypeForCat(forms, itemsNum[itemsNum.length-1]);
-            });
-
         d3.select("#saveCategorical").on("click", function() {
             const setVariable = {};
             itemsNum.forEach(function(x) {
@@ -111,12 +105,16 @@ function createCategorical() {
             $("#catModal").modal('hide');
         })
     } else {
-        const typeDivs = d3.select("#catVariableBody")
-            .selectAll("div")
+        itemsNum = typesToAnnotate.map(function(t) {
+            return(typesToAnnotate.indexOf(t) + 1);
+        });
+        const typeDivs = forms.selectAll("div.addCat")
             .data(typesToAnnotate).enter()
-            .append("div")
+            .append("div").attr("class", "addCat");
+
         typeDivs.append("h5").text(function(d) {return(msg["for_type"] + d); });
         typeDivs.each(fillCategorical);
+        
         d3.select("#saveCategorical")
             .on("click", function() {
                 const setVariable = {};
@@ -136,14 +134,27 @@ function createCategorical() {
             });
     }
 
+    d3.select("#catVariableBody").append("button")
+        .attr("type", "button")
+        .attr("class", "btn btn-danger m-2")
+        .html("<i class='fas fa-plus'></i> " + msg["add_type"])
+        .on("click", function() {
+            itemsNum.push(itemsNum[itemsNum.length-1] + 1);
+            addTypeForCat(forms, itemsNum[itemsNum.length-1]);
+        });
+
     
 }
 
 function addTypeForCat(forms, value) {
     forms.append("hr");
     const defineType = forms.append("form");
-    defineType.append("label").text(msg["define_type"]);
-    defineType.append("input").attr("type", "text")
+    defineType.append("label")
+        .attr("for", "catType" + value)
+        .text(msg["define_type"]);
+    defineType.append("input")
+        .attr("type", "text")
+        .attr("class", "form-control")
         .attr("id", "catType" + value);
     forms.append("div").each(fillCategorical);
 }
@@ -165,13 +176,24 @@ function fillCategorical(p) {
         })
 
     function addCategorical(form, value) {
-        const ff = form.append("form").attr("class", "form-inline");
-        ff.append("label").attr("class", "px-2").text(msg['label']);
-        ff.append("input").attr("type", "text")
-            .attr("id", function(d) {return("label-" + value)});
-        ff.append("label").attr("class", "px-2").text(msg['value']);
-        ff.append("input").attr("type", "text")
-            .attr("id", function(d) {return("value-" + value)});
+        const ff = form.append("form").append("div").attr("class", "row");
+        const ffLabel = ff.append("div").attr("class", "col-6");
+        const ffValue = ff.append("div").attr("class", "col-6");
+        
+        ffLabel.append("label").attr("class", "px-2")
+            .attr("for", function(d) {return("label-" + value); })
+            .style("font-weight", "bold")
+            .text(msg['label']);
+        ffLabel.append("input").attr("type", "text")
+            .attr("class", "form-control")
+            .attr("id", function(d) {return("label-" + value); });
+        ffValue.append("label").attr("class", "px-2")
+            .attr("for", function(d) {return("value-" + value); })
+            .style("font-weight", "bold")
+            .text(msg['value']);
+        ffValue.append("input").attr("type", "text")
+            .attr("class", "form-control")
+            .attr("id", function(d) {return("value-" + value); });
     }
 }
 
@@ -819,7 +841,7 @@ function displayNoSense() {
     });
 }
 
-// update display of ocncordances
+// update display of concordances
 function displayConc() {
     conc.style('display', function (d) {
         return (toClassify.indexOf(d.id) == viewing ? 'block' : 'none');
