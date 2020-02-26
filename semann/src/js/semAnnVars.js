@@ -4,6 +4,7 @@ var types = {}, announced = {};
 var variables, selectedVariables = [], personalizedVariables = {};
 var categVars, numVars;
 var valuesNum, itemsNum, forms;
+var detachedVariables = {};
 var config = {
     'user' : '',
     'variables' : [],
@@ -63,6 +64,9 @@ function start(msgSource) {
     d3.selectAll("button[name='saveChanges']").text(msg["save_changes"]);
 
     offerVariables(variables);
+    if (d3.keys(types).length > 0) {
+        offerTypes(d3.keys(types));
+    }
 
     $("#uploadVars").on("click", function (e) { e.stopPropagation(); });
     

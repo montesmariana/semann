@@ -24,7 +24,9 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "semann"
+            "name": "semann",
+            "iconUrl" : "https://github.com/montesmariana/semann/blob/master/semann/src/assets/favicon.ico",
+            "loadingGif" : "src/assets/waitingCat.gif"
           }
         },
         {
