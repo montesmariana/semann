@@ -40,7 +40,7 @@
         "typelist_title" : "Items",
         "before_concordance" : "This is the current concordance line.",
         "instruction_variable" : "Assign the corresponding value for the variable: ",
-        "instruction_confidence" : "How confident are you in your choice? How well does the example fit that sense tag?",
+        "instruction_confidence" : "How confident are you in your choice? How well does the example fit that tag?",
         "instruction_cues" : "Click on the words that helped you annotate this line.",
         "instruction_comments" : "Any observations about this concordance?",
         "personalized_options" : "Add personalized options",
@@ -54,12 +54,16 @@
         "save_changes" : "Save changes",
         "label" : "Label",
         "value" : "Value",
-        "define_type" : "For which type?",
+        "define_type" : "What's your type called?",
         "for_type" : "Create a variable for ",
         "add_type" : "Add type",
         "add_value" : "Add value",
-        "variable_exists" : "This variable name already exists"
-
+        "variable_exists" : "This name is not available",
+        "define_types" : "Please name your type(s)",
+        "source" : "Source",
+        "your_types" : "Your types: ",
+        "variable_selection": "Select a variable",
+        "overall" : "overall"
     },
     "nl" : {
         "title" : "Semantische annotatie",
@@ -115,10 +119,13 @@
         "save_changes" : "Opslaan",
         "label" : "Label",
         "value" : "Waarde",
-        "define_type" : "Voor welke item?",
+        "define_type" : "Wat is de naam van je item?",
         "for_type" : "Een variabel creëren voor ",
         "add_type" : "Item toevoegen",
         "add_value" : "Waarde toevoegen",
-        "variable_exists" : "Deze naam is niet beschikbaar"
+        "variable_exists" : "Deze naam is niet beschikbaar",
+        "define_types" : "Geef de naam van je types aub",
+        "source" : "Bron",
+        "your_types" : "Je types: "
     }
 }

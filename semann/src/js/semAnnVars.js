@@ -2,7 +2,7 @@ var text = {}, saved = JSON.stringify(text);
 var counter = 0, instructionNumber, toClassify, viewing;
 var types = {}, announced = {};
 var variables, selectedVariables = [], personalizedVariables = {};
-var categVars, numVars;
+var categVars, numVars, anns;
 var valuesNum, itemsNum, forms;
 var detachedVariables = {};
 var config = {
@@ -20,9 +20,9 @@ var conc;
 function start(msgSource) {
     msg = msgSource;
     variables = [
-        { "label": msg['confidence_label'], "code": "confidence" },
-        { "label": msg['keywords_label'], "code": "cues" },
-        { "label": msg['comments_label'], "code": "comments" }
+        { "label": msg['confidence_label'], "code": "confidence", "type" :"default"},
+        { "label": msg['keywords_label'], "code": "cues", "type" :"default"},
+        { "label": msg['comments_label'], "code": "comments", "type" :"default"}
     ];
 
     // Set title (name of application)

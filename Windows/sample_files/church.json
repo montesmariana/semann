@@ -16,5 +16,29 @@
             "code": "service",
             "label": "<strong>(Christian) religious service or activity around worship and catechism</strong>: <em>Do you go to church on Sundays?</em>"
         }
+    ],
+    "church1": [
+        {
+            "code": "building",
+            "label": "First label for first lemma"
+        },
+        {
+            "code": "congregation",
+            "label": "Second label for first lemma"
+        }
+    ],
+    "church2": [
+        {
+            "code": "building",
+            "label": "First label for second lemma"
+        },
+        {
+            "code": "congregation",
+            "label": "Second label for second lemma"
+        },
+        {
+            "code": "thrid",
+            "label": "Third label for second lemma"
+        }
     ]
 }

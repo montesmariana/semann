@@ -5,7 +5,8 @@ Developed within the <a href="https://www.arts.kuleuven.be/ling/qlvl/projects/cu
 
 ## Features
 - Upload your concordances
-    - It must be a tab separated file with at least the columns 'id', 'left', 'target' and 'right', the name being "[type].tsv".
+    - It must be a tab separated file with at least the columns 'id', 'left', 'target' and 'right'.
+    - You name your type (group of tokens) and access it with the button in the sidebar. By default, the sets of values that a categorical variable can take depend on the name of the type, **but** if you have a column named 'lemma', that label will be used for grouping when showing the categorical variable. (Test with file "church.grouped.tsv")
     - Each different type you want to analyze must be a different file.
 - Design your variables
     - Categorical variables, with a clear name (the name in your column, eventually), html labels for the annotation and the actual values that would show up in your dataframe.
