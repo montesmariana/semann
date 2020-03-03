@@ -563,13 +563,13 @@ function showAnnotations(variable, supravariable = null) {
             anns = conc.select("div.annotationsSection");
         }
 
-        if (d3.keys(detachedVariables).indexOf(variable) !== -1) {
-            detachedVariables[variable].appendTo("div.annotationsSection");
-            selectedVariables.forEach(function (d) {
-                d3.select("#instNum_" + type + "_" + d)
-                    .text(selectedVariables.indexOf(d) + 1 + ".");
-            });
-        } else {
+        // if (d3.keys(detachedVariables).indexOf(variable) !== -1) {
+        //     detachedVariables[variable].appendTo("div.annotationsSection");
+        //     selectedVariables.forEach(function (d) {
+        //         d3.select("#instNum_" + type + "_" + d)
+        //             .text(selectedVariables.indexOf(d) + 1 + ".");
+        //     });
+        // } else {
             switch (variable) {
                 case "confidence":
                     addConfidence(supravariable);
@@ -583,7 +583,7 @@ function showAnnotations(variable, supravariable = null) {
                 default:
                     personalizedVariables[variable]['type'] === 'numerical' ? addNumerical(variable) : addCategorical(variable);
             }
-        }
+        // }
     }
 }
 
@@ -699,7 +699,7 @@ function addConfidence(supravariable = null) {
     writeInstruction(msg['instruction_confidence'], varName);
 
     conf = block.append("div").attr("class", "row no-gutters justify-content-sm-center")
-        .append("div").attr("id", "confidence")
+        .append("div").attr("id", varName)
         .attr("class", "btn-group-toggle")
         .attr("data-toggle", "buttons");
 
@@ -731,7 +731,7 @@ function addConfidence(supravariable = null) {
         }
         text[type][analized][varName] = answer;
         updateTargetColor();
-        colorStars();
+        colorStars(varName);
     });
 
     block.append("hr");
@@ -994,13 +994,13 @@ function checkType() {
 }
 
 // update color of confidence stars
-function colorStars() {
-    conf.selectAll("label")
+function colorStars(varName) {
+    d3.selectAll("#"+varName).selectAll("label")
         .style("color", function (d) {
             var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
             if (!hasSense(here, type) ||
-                d3.keys(text[type][here]).indexOf('confidence') === -1 ||
-                text[type][here]['confidence'] < d) {
+                d3.keys(text[type][here]).indexOf(varName) === -1 ||
+                text[type][here][varName] < d) {
                 return ("#bdbdbd");
             } else {
                 return ("#ffa500");
