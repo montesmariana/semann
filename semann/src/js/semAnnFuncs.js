@@ -351,13 +351,7 @@ function askVars() {
         }
     }).then((result) => {
         if (result.value) {
-            let varFile = dialog.showOpenDialogSync(options = {
-                title: msg['upload_file'],
-                filters: [{
-                    name: "JSON",
-                    extensions: ["json"]
-                }]
-            });
+            let varFile = openJSON();
             const fileContents = JSON.parse(fs.readFileSync(varFile[0]));
             if (d3.keys(fileContents).indexOf("hasAttributes") > -1) {
                 const contents = fileContents;
@@ -1072,13 +1066,7 @@ function userOnClick() {
                 }
             });
         } else if (value.value === 'load') {
-            const config_file = dialog.showOpenDialogSync(options = {
-                title: msg['upload_file'],
-                filters: [{
-                    name: "JSON",
-                    extensions: ["json"]
-                }]
-            });
+            const config_file = openJSON();
             config = JSON.parse(fs.readFileSync(config_file[0]));
             user = config['user'];
             selectedVariables = config['variables'];

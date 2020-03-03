@@ -1,14 +1,18 @@
 function uploadProgress() {
-    const progressFile = dialog.showOpenDialogSync(options = {
+    const progressFile = openJSON();
+    text = JSON.parse(fs.readFileSync(progressFile[0]));
+    saved = JSON.stringify(text);
+    showConc();
+}
+
+function openJSON() {
+    return(dialog.showOpenDialogSync(options = {
         title: msg['upload_file'],
         filters: [{
             name: "JSON",
             extensions: ["json"]
         }]
-    });
-    text = JSON.parse(fs.readFileSync(progressFile[0]));
-    saved = JSON.stringify(text);
-    showConc();
+    }));
 }
 
 function uploadType() {

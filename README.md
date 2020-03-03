@@ -14,8 +14,8 @@ Developed within the <a href="https://www.arts.kuleuven.be/ling/qlvl/projects/cu
     - Variables from file (categorical variables are stored in a file, and then you can load them again).
 - Select different variables to annotate
     - Your custom variables
-    - Confidence rating
-    - Selection of relevant contextwords
+    - Confidence rating, for overall or categorical-variable-specific
+    - Selection of relevant contextwords, for overall or categorical-variable-specific
     - Comments
 - Set and reuse your settings, by clicking on the username (below the title)
     - Change your username.

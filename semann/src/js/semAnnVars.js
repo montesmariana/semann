@@ -1,21 +1,24 @@
-var text = {}, saved = JSON.stringify(text);
-var counter = 0, instructionNumber, toClassify, viewing;
-var types = {}, announced = {};
-var variables, selectedVariables = [], personalizedVariables = {};
-var categVars, numVars, anns;
-var valuesNum, itemsNum, forms;
-var detachedVariables = {};
-var config = {
+let text = {};
+let saved = JSON.stringify(text);
+let counter = 0;
+let toClassify = 0;
+let viewing = '';
+let types = {}, announced = {};
+let variables, selectedVariables = [], personalizedVariables = {};
+let categVars, numVars, anns;
+let valuesNum, itemsNum, forms;
+// var detachedVariables = {};
+const config = {
     'user' : '',
     'variables' : [],
     'personalized_variables' : [],
     'types' : []
 };
-user = "Subtle Annotator";
+let user = "Subtle Annotator";
 config['user'] = user;
 text['user'] = user;
-var msg;
-var conc;
+let msg;
+let conc;
 
 function start(msgSource) {
     msg = msgSource;
