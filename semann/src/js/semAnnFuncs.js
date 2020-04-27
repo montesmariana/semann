@@ -10,26 +10,15 @@ function offerVariables(startingVariables) {
         .attr("class", "dropdown-item var")
         .attr("xlink:href", "#")
         // .attr("value", function (d) { return (d.code) })
-        .classed('active', function (d) {
+        .classed("active", function (d) {
             return (selectedVariables.indexOf(d.code) !== -1);
         })
         .text(function (d) { return (d.label) })
         .on("click", function (d) {
-            switch (d.code) {
-                case "confidence":
-                    toggleSubvariable("confidence");
-                    break;
-                case "cues":
-                    toggleSubvariable("cues");
-                    break;
-                default:
-                    toggleVariable(d.code);
-            }
-            d3.select(this).classed('active', function (d) {
+            loadVars(d.code);
+            d3.select(this).classed("active", function (d) {
                 return (selectedVariables.indexOf(d.code) !== -1);
             });
-            config['variables'] = selectedVariables;
-
             // if (d3.keys(types).length > 0) {
             //     showAnnotations();
             // }
@@ -37,13 +26,26 @@ function offerVariables(startingVariables) {
 
     varsMenu.append("div").attr("class", "dropdown-divider");
     varsMenu.append("button").attr("class", "dropdown-item file")
-        .text(msg['personalized_options'])
+        .text(msg["personalized_options"])
         .on("click", otherVars);
 
     // if (d3.keys(types).length > 0) {
     //     showAnnotations();
     // }
 }
+function loadVars(varName){
+    switch (varName) {
+        case "confidence":
+            toggleSubvariable("confidence");
+            break;
+        case "cues":
+            toggleSubvariable("cues");
+            break;
+        default:
+            toggleVariable(varName);
+    }
+}
+
 function toggleVariable(variable) {
     const checkAttributes = d3.keys(personalizedVariables[variable]).indexOf("hasAttributes") !== -1;
     if (selectedVariables.indexOf(variable) === -1) {
@@ -55,8 +57,7 @@ function toggleVariable(variable) {
             });
         }
     } else {
-        selectedVariables.splice(selectedVariables.indexOf(variable), 1);
-
+        _.pull(selectedVariables, variable);
         removeAnnotations(variable);
         if (checkAttributes) {
             personalizedVariables[variable]["hasAttributes"].forEach(function (x) {
@@ -69,7 +70,7 @@ function toggleVariable(variable) {
 function toggleSubvariable(subvariable) {
     const inputOptions = {};
     variables.forEach(function (d) {
-        if (d.type !== 'default') { inputOptions[d.code] = d.label }
+        if (d.type !== "default") { inputOptions[d.code] = d.label }
     });
     inputOptions[msg["overall"]] = msg["overall"][0].toUpperCase() + msg["overall"].substr(1).toLowerCase();
     Swal.fire({
@@ -78,7 +79,7 @@ function toggleSubvariable(subvariable) {
         inputOptions: inputOptions
     }).then((result) => {
         if (result.value) {
-            if (result.value === 'overall') {
+            if (result.value === "overall") {
                 toggleVariable(subvariable, "default");
             } else {
                 const varAttributes = personalizedVariables[result.value]["hasAttributes"];
@@ -86,7 +87,7 @@ function toggleSubvariable(subvariable) {
                     varAttributes.push(subvariable);
                     if (selectedVariables.indexOf(result.value) !== -1) showAnnotations(subvariable, result.value);
                 } else {
-                    varAttributes.splice(varAttributes.indexOf(subvariable), 1);
+                    _.pull(varAttributes, subvariable);
                     if (selectedVariables.indexOf(result.value) !== -1) removeAnnotations(subvariable + "_" + result.value);
                 }
             }
@@ -96,22 +97,22 @@ function toggleSubvariable(subvariable) {
 
 function otherVars() {
     Swal.fire({
-        title: msg['username_actions'],
+        title: msg["username_actions"],
         input: "select",
         inputOptions: {
-            categorical: msg['categorical_option'],
-            numerical: msg['numerical_option'],
-            fromFile: msg['from_file_option']
+            categorical: msg["categorical_option"],
+            numerical: msg["numerical_option"],
+            fromFile: msg["from_file_option"]
         },
-        inputPlaceholder: msg['action_placeholder'],
+        inputPlaceholder: msg["action_placeholder"],
         showCancelButton: true
     }).then((value) => {
-        if (value.value === 'categorical') {
+        if (value.value === "categorical") {
             createCategorical();
-            $("#catModal").modal('show');
-        } else if (value.value === 'numerical') {
+            $("#catModal").modal("show");
+        } else if (value.value === "numerical") {
             createNumerical();
-        } else if (value.value === 'fromFile') {
+        } else if (value.value === "fromFile") {
             askVars();
         }
     });
@@ -145,7 +146,7 @@ function createCategorical() {
         d3.select("#saveCategorical").on("click", function () {
             const extras = [];
             d3.selectAll("[name='wantExtras']").each(function () {
-                if (d3.select(this).property('checked')) extras.push(d3.select(this).property('value'));
+                if (d3.select(this).property("checked")) extras.push(d3.select(this).property("value"));
             })
             const setVariable = {
                 "type": "categorical",
@@ -161,7 +162,7 @@ function createCategorical() {
                     });
                 });
             });
-            let varName = d3.select("#catTitle").property('value');
+            let varName = d3.select("#catTitle").property("value");
             saveCategorical(varName, setVariable);
         })
     } else {
@@ -179,7 +180,7 @@ function createCategorical() {
             .on("click", function () {
                 const extras = [];
                 d3.selectAll("[name='wantExtras']").each(function () {
-                    if (d3.select(this).property('checked')) extras.push(d3.select(this).property('value'));
+                    if (d3.select(this).property("checked")) extras.push(d3.select(this).property("value"));
                 })
                 const setVariable = {
                     "type": "categorical",
@@ -195,7 +196,7 @@ function createCategorical() {
                         });
                     });
                 });
-                var varName = d3.select("#catTitle").property('value');
+                var varName = d3.select("#catTitle").property("value");
                 saveCategorical(varName, setVariable);
             });
     }
@@ -261,7 +262,7 @@ function saveCategorical(varName, content) {
                 showAnnotations(x, varName);
             });
         }
-        $("#catModal").modal('hide');
+        $("#catModal").modal("hide");
     }
 }
 
@@ -304,14 +305,14 @@ function fillCategorical(p) {
         ffLabel.append("label").attr("class", "px-2")
             .attr("for", function (d) { return ("label-" + value); })
             .style("font-weight", "bold")
-            .text(msg['label']);
+            .text(msg["label"]);
         ffLabel.append("input").attr("type", "text")
             .attr("class", "form-control")
             .attr("id", function (d) { return ("label-" + value); });
         ffValue.append("label").attr("class", "px-2")
             .attr("for", function (d) { return ("value-" + value); })
             .style("font-weight", "bold")
-            .text(msg['value']);
+            .text(msg["value"]);
         ffValue.append("input").attr("type", "text")
             .attr("class", "form-control")
             .attr("id", function (d) { return ("value-" + value); });
@@ -324,9 +325,9 @@ function createNumerical() {
         input: "text",
         inputValidator: (value) => {
             if (!value) {
-                return (msg['load_variable_insist']);
+                return (msg["load_variable_insist"]);
             } else if (!variableAvailable(value)) {
-                return (msg['variable_exists']);
+                return (msg["variable_exists"]);
             }
         }
     }).then((result) => {
@@ -357,7 +358,7 @@ function askVars() {
                 const contents = fileContents;
                 addPersonalizedVariable(result.value, contents, varFile[0]);
                 showAnnotations(result.value);
-                contents["hasAttributes"].forEach(function (x) { return (showAnnotations(d, result.value)); });
+                contents["hasAttributes"].forEach(function (x) { return (showAnnotations(x, result.value)); });
             } else {
                 const contents = { "type": "categorical", "values": fileContents, "hasAttributes": [] };
                 addPersonalizedVariable(result.value, contents, varFile[0]);
@@ -367,7 +368,7 @@ function askVars() {
         }
     });
 
-    // latest['defs'] = def_file[0];
+    // latest["defs"] = def_file[0];
     // if (d3.keys(types).length > 0) {
     //     start();
     // }
@@ -375,22 +376,21 @@ function askVars() {
 
 function addPersonalizedVariable(name, content, path) {
     personalizedVariables[name] = content;
-    config['personalized_variables'].push({
+    config["personalized_variables"].push({
         variable: name, path: path,
-        hasAttributes: d3.keys(content).indexOf('hasAttributes') === -1 ? [] : content["hasAttributes"]
+        hasAttributes: d3.keys(content).indexOf("hasAttributes") === -1 ? [] : content["hasAttributes"]
     });
     variables.push({
         code: name, label: name[0].toUpperCase() + name.substr(1).toLowerCase(),
-        type: path === 'numerical' ? 'numerical' : 'categorical'
+        type: path === "numerical" ? "numerical" : "categorical"
     });
     selectedVariables.push(name);
-    console.log(selectedVariables);
     offerVariables(variables);
 }
 
 function showConc() {
     counter += 1;
-    // this_selection = this_user['tokens'][type].slice(0);
+    // this_selection = this_user["tokens"][type].slice(0);
     // Remove and recreate concordance to avoid accumulation
     $("#concordance").remove();
     $("#waiting").remove();
@@ -415,19 +415,19 @@ function showConc() {
     if (d3.keys(text).indexOf(type) === -1) {
         text[type] = {};
         saved = JSON.stringify(text);
-    } // Create a dictionary within 'text' for this type
+    } // Create a dictionary within "text" for this type
 
     checkType(); // mark the types that are done
 
-    // Set tabs, with 'overview' selected by default
+    // Set tabs, with "overview" selected by default
     tabs.selectAll("li")
-        .data([msg['tab_1'], msg['tab_2']]).enter()
+        .data([msg["tab_1"], msg["tab_2"]]).enter()
         .append("li")
         .attr("class", "nav-item")
         .append("a")
         .attr("class", "nav-link")
         .attr("id", function (d) { return (d + "-tab"); })
-        .classed("active", function (d) { return (d == msg['tab_1']); })
+        .classed("active", function (d) { return (d == msg["tab_1"]); })
         .attr("data-toggle", "tab")
         .attr("href", function (d) { return ("#" + d); })
         .attr("role", "tab")
@@ -436,11 +436,11 @@ function showConc() {
 
     workspace.append("div").attr("class", "tab-content")
         .selectAll("div")
-        .data([msg['tab_1'], msg['tab_2']]).enter()
+        .data([msg["tab_1"], msg["tab_2"]]).enter()
         .append("div")
         .attr("class", "tab-pane")
         .attr("id", function (d) { return (d); })
-        .classed("active", function (d) { return (d == msg['tab_1']); })
+        .classed("active", function (d) { return (d == msg["tab_1"]); })
         .attr("width", "100vp")
         .attr("role", "tabpanel")
         .attr("aria-labelledby", function (d) { return (d + "-tab"); });
@@ -448,13 +448,13 @@ function showConc() {
     // OVERVIEW TAB
 
     // Create scrollable space for concordances (also to separate from legend)
-    overview = d3.select("#" + msg['tab_1'])
+    overview = d3.select("#" + msg["tab_1"])
         .append("div")
         .attr("class", "mt-4")
         .style("height", "70vh").style("overflow", "auto");
 
     // For each concordance we get a row, with a left, target and right column
-    // 'target' column shows how far the progress is with colors and is clickable to take you to that occurrence
+    // "target" column shows how far the progress is with colors and is clickable to take you to that occurrence
     overview.selectAll("div")
         .data(concordances).enter()
         .append("div").attr("class", "row no-gutters justify-content-sm-center")
@@ -469,13 +469,13 @@ function showConc() {
                 .append("p").attr("class", "text-sm-center")
                 .style("font-weight", "bold")
                 .text(function (d) { return (d.target); })
-                .style('cursor', 'pointer')
+                .style("cursor", "pointer")
                 .on("click", function (d) {
                     tabs.selectAll(".nav-link").classed("active", function () {
-                        return (d3.select(this).attr("id") == msg['tab_2'] + "-tab");
+                        return (d3.select(this).attr("id") == msg["tab_2"] + "-tab");
                     })
                     workspace.selectAll(".tab-pane").classed("active", function () {
-                        return (d3.select(this).attr("id") == msg['tab_2']);
+                        return (d3.select(this).attr("id") == msg["tab_2"]);
                     });
                     viewing = toClassify.indexOf(d.id);
                     displayConc();
@@ -491,20 +491,20 @@ function showConc() {
 
     // SENSE ANNOTATION TAB
 
-    // Store in the 'conc' variable the set of divs tied to the concordance, to which we'll add everything else
-    conc = d3.select("#" + msg['tab_2']).append("div").attr("class", "row justify-content-sm-center mt-5")
+    // Store in the "conc" variable the set of divs tied to the concordance, to which we"ll add everything else
+    conc = d3.select("#" + msg["tab_2"]).append("div").attr("class", "row justify-content-sm-center mt-5")
         .append("div").attr("class", "col-sm-12").selectAll("div")
         .data(concordances).enter()
         .append("div")
-        .attr("token_id", function (d) { return (d.id); }); // The 'token_id' attribute makes it available for nested elements
+        .attr("token_id", function (d) { return (d.id); }); // The "token_id" attribute makes it available for nested elements
 
     displayConc(); // displays the concordance that corresponds to the current token
 
     /// FIRST show concordance
 
     conc.append("p")
-        .style('color', '#696969')
-        .html(msg['before_concordance']);
+        .style("color", "#696969")
+        .html(msg["before_concordance"]);
 
     conc.each(function (d) {
         var line = d3.select(this);
@@ -512,18 +512,14 @@ function showConc() {
             .attr("class", "text-center")
             .html(function (d) {
                 return (d.left +
-                    '<span class="px-1 text-primary" style="font-weight:bold">' +
-                    d.target + '</span>' + d.right);
+                    "<span class='px-1 text-primary' style='font-weight:bold'>" +
+                    d.target + "</span>" + d.right);
             });
     });
 
     conc.append("hr");
 
-    // if (selectedVariables.length > 0) {
-    //     showAnnotations();
-    // }
-
-    buttons = d3.select("#" + msg['tab_2']).append("div")
+    buttons = d3.select("#" + msg["tab_2"]).append("div")
         .attr("class", "row justify-content-center")
         .append("div").attr("class", "col-sm-auto")
         .append("div").attr("class", "btn-group mt-2");
@@ -550,8 +546,6 @@ function showConc() {
 }
 
 function showAnnotations(variable, supravariable = null) {
-    console.log(selectedVariables);
-
     if (conc === undefined) {
         uploadType();
         showAnnotations(variable);
@@ -581,7 +575,7 @@ function showAnnotations(variable, supravariable = null) {
                     addComments();
                     break;
                 default:
-                    personalizedVariables[variable]['type'] === 'numerical' ? addNumerical(variable) : addCategorical(variable);
+                    personalizedVariables[variable]["type"] === "numerical" ? addNumerical(variable) : addCategorical(variable);
             }
         // }
     }
@@ -597,7 +591,7 @@ function removeAnnotations(variable) {
             .text(instructionNumber.toString() + ".");
         if (d3.keys(personalizedVariables[d]).indexOf("hasAttributes") > -1) {
             personalizedVariables[d]["hasAttributes"].forEach(function (a) {
-                const subInstNumber = instructionNumber.toString() + '.' + (personalizedVariables[d]["hasAttributes"].indexOf(a) + 1).toString();
+                const subInstNumber = instructionNumber.toString() + "." + (personalizedVariables[d]["hasAttributes"].indexOf(a) + 1).toString();
                 d3.selectAll(".instNum_" + type + "_" + a + "_" + d)
                     .text(subInstNumber + ".");
             });
@@ -606,12 +600,12 @@ function removeAnnotations(variable) {
 }
 
 function writeInstruction(text, variable) {
-    const varNameSplit = variable.split('_');
+    const varNameSplit = variable.split("_");
     const varName = varNameSplit.length === 1 ? varNameSplit[0] : varNameSplit[1];
     const instructionNumber = selectedVariables.indexOf(varName) + 1;
-    const instructionNumberString = varNameSplit.length === 1 ? instructionNumber.toString() : instructionNumber.toString() + '.' + (personalizedVariables[varName]["hasAttributes"].indexOf(varNameSplit[0]) + 1).toString();
+    const instructionNumberString = varNameSplit.length === 1 ? instructionNumber.toString() : instructionNumber.toString() + "." + (personalizedVariables[varName]["hasAttributes"].indexOf(varNameSplit[0]) + 1).toString();
     d3.selectAll("." + type + "_" + variable).append("p")
-        .style('color', '#696969')
+        .style("color", "#696969")
         .html("<span class='instNum_" + type + "_" + variable + "' style='font-weight:bold;'>" + instructionNumberString + ".</span> " + text);
     // instructionNumber += 1;
 }
@@ -620,7 +614,7 @@ function addNumerical(variable) {
 
     const block = anns.append("div").attr("class", type + "_" + variable);
 
-    writeInstruction(msg['instruction_variable'] + variable + '.', variable);
+    writeInstruction(msg["instruction_variable"] + variable + ".", variable);
 
     block.append("input").attr("type", "number").attr("name", type + "_" + variable);
 
@@ -628,7 +622,7 @@ function addNumerical(variable) {
 
     $(document).on("change", "input[name='" + type + "_" + variable + "']", function () {
         var analized = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
-        var answer = d3.select(this).property('value');
+        var answer = d3.select(this).property("value");
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
         }
@@ -641,7 +635,7 @@ function addCategorical(variable) {
 
     const block = anns.append("div").attr("class", type + "_" + variable);
 
-    writeInstruction(msg['instruction_variable'] + variable + ".", variable);
+    writeInstruction(msg["instruction_variable"] + variable + ".", variable);
 
     block.append("div").attr("class", "row no-gutters justify-content-sm-center")
         .append("div").attr("class", "btn-group-vertical btn-group-toggle mt-2 btn-block")
@@ -649,7 +643,7 @@ function addCategorical(variable) {
         .selectAll("label")
         .data(function (d) {
             const lemma = d.lemma === undefined ? type : d.lemma;
-            return (personalizedVariables[variable]['values'][lemma]);
+            return (personalizedVariables[variable]["values"][lemma]);
         }).enter()
         // .data(addNoneTag(personalizedVariables[variable][type])).enter() //uncomment to add None-Tags
         .append("label")
@@ -668,17 +662,17 @@ function addCategorical(variable) {
         .attr("value", function (d) { return (d.code) });
 
     // Control de results when var changes
-    $(document).on('change', 'input[name="' + type + '_' + variable + '"]', function (event) {
+    $(document).on("change", "input[name='" + type + "_" + variable + "']", function (event) {
         var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
-        var answer = d3.select(this).attr('value');
+        var answer = d3.select(this).attr("value");
         // register data
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
         }
         text[type][analized][variable] = answer;
-        // text[type][analized]['cues'] = [];
+        // text[type][analized]["cues"] = [];
 
-        // inputtext.select("#" + type + toClassify.indexOf(analized) + "_comments").property('value', '');
+        // inputtext.select("#" + type + toClassify.indexOf(analized) + "_comments").property("value", "");
 
         updateTargetColor();
         // colorStars();
@@ -696,7 +690,7 @@ function addConfidence(supravariable = null) {
 
     const block = anns.append("div").attr("class", type + "_" + varName);
 
-    writeInstruction(msg['instruction_confidence'], varName);
+    writeInstruction(msg["instruction_confidence"], varName);
 
     conf = block.append("div").attr("class", "row no-gutters justify-content-sm-center")
         .append("div").attr("id", varName)
@@ -717,15 +711,15 @@ function addConfidence(supravariable = null) {
         .attr("name", type + "_" + varName)
         .attr("value", function (d) { return (d); });
 
-    colorStars();
+    colorStars(varName);
 
     conf.append("span").attr("class", "px-2")
         .text(msg["confidence_all"]);
 
     // Control when confidence changes
-    $(document).on('change', 'input[name="' + type + '_' + varName + '"]', function (event) {
+    $(document).on("change", "input[name='" + type + "_" + varName + "']", function (event) {
         var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
-        var answer = d3.select(this).property('value');
+        var answer = d3.select(this).property("value");
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
         }
@@ -743,24 +737,24 @@ function addCues(supravariable = null) {
 
     const block = anns.append("div").attr("class", type + "_" + varName);
 
-    writeInstruction(msg['instruction_cues'], varName)
+    writeInstruction(msg["instruction_cues"], varName)
 
     cues = block.append("div").attr("class", "row justify-content-center")
         .each(function (d) {
-            var line = d3.select(this).append('p').attr("class", "text-center"),
+            var line = d3.select(this).append("p").attr("class", "text-center"),
                 leftContext = [],
                 rightContext = [],
-                leftSource = d.left.split(' '),
-                rightSource = d.right.split(' '); // turns the lines into lists of context words
+                leftSource = d.left.split(" "),
+                rightSource = d.right.split(" "); // turns the lines into lists of context words
 
-            // Each context word is represented by an 'index' (what gets registered), comprised of
-            // a letter ('L' for left, 'R' for right) and the distance to the target (starting with 1)
+            // Each context word is represented by an "index" (what gets registered), comprised of
+            // a letter ("L" for left, "R" for right) and the distance to the target (starting with 1)
             leftContext = leftSource.map(function (d, i) {
                 var cwIdx = leftSource.length - i - 1;
-                return ({ 'index': 'L' + cwIdx.toString(), 'cw': d });
+                return ({ "index": "L" + cwIdx.toString(), "cw": d });
             });
             rightContext = rightSource.map(function (d, i) {
-                return ({ "index": "R" + i.toString(), 'cw': d });
+                return ({ "index": "R" + i.toString(), "cw": d });
             });
             halfLine(leftContext);
 
@@ -780,8 +774,8 @@ function addCues(supravariable = null) {
                     .data(context).enter()
                     .append("label").attr("class", "btn btn-cue px-1")
                     .classed("active", function (d) {
-                        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr('token_id');
-                        // var chosen = hasSense(here, type) && text[type][here]['cues'].indexOf(d.index) !== -1;
+                        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+                        // var chosen = hasSense(here, type) && text[type][here]["cues"].indexOf(d.index) !== -1;
                         var chosen = d3.keys(text[type][here]).indexOf(varName) !== -1 && text[type][here][varName].indexOf(d.index) !== -1;
                         return (chosen ? true : null);
                     })
@@ -794,28 +788,28 @@ function addCues(supravariable = null) {
 
         });
 
-    // Control of results when the 'cues' change
+    // Control of results when the "cues" change
     $("." + type + "_" + varName).on("change", "input[name='" + type + counter + "_" + varName + "']", function () {
         var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
-        console.log('Token_id: ' + analized);
-        var answer = d3.select(this).attr('value');
+        console.log("Token_id: " + analized);
+        var answer = d3.select(this).attr("value");
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
         }
         console.log("Token register before change: ")
         console.log(text[type][analized]);
-        if (d3.keys(text[type][analized]).indexOf('cues') === -1) {
+        if (d3.keys(text[type][analized]).indexOf(varName) === -1) {
             text[type][analized][varName] = [];
         }
-        var cues_list = text[type][analized][varName];
-        if (cues_list.indexOf('none') === 0) {
-            cues_list.splice(0, 1);
+        const cues_list = text[type][analized][varName];
+        if (cues_list.indexOf("none") === 0) {
+            _.pull(cues_list, "none");
         }
 
         if (cues_list.indexOf(answer) === -1) {
             cues_list.push(answer);
         } else { //if you are unclicking
-            cues_list.splice(cues_list.indexOf(answer), 1);
+            _.pull(cues_list, answer);
         }
         console.log("Cues_list after change: " + cues_list);
         console.log("Token register after change: ")
@@ -827,28 +821,28 @@ function addCues(supravariable = null) {
     });
 
     // HERE we add the reminder to add cues if the sense is annotated but there are not cues
-    reminder = block.append('div')
-        .attr('class', 'alert alert-warning text-center')
-        .attr('role', 'alert')
+    reminder = block.append("div")
+        .attr("class", "alert alert-warning text-center")
+        .attr("role", "alert")
         .html(msg["reminder"]);
 
-    // and a confirmation if they have selected 'here'
-    no_cues_conf = block.append('div')
-        .attr('class', 'alert alert-success text-center')
-        .attr('role', 'alert')
+    // and a confirmation if they have selected "here"
+    no_cues_conf = block.append("div")
+        .attr("class", "alert alert-success text-center")
+        .attr("role", "alert")
         .html(msg["no_cues_conf"]);
 
     displayReminder();
 
-    // Use the <a> in the reminder message to select 'no cues' as option
+    // Use the <a> in the reminder message to select "no cues" as option
     reminder.select("#no-cues-selected")
-        .style('cursor', 'pointer')
+        .style("cursor", "pointer")
         // .attr("href", "#")
         .on("click", function (d) {
             if (d3.keys(text[type]).indexOf(d.id) === -1) {
                 text[type][d.id] = {};
             }
-            text[type][d.id][varName] = ['none'];
+            text[type][d.id][varName] = ["none"];
             displayReminder();
             updateTargetColor();
         });
@@ -859,11 +853,11 @@ function addCues(supravariable = null) {
 function addComments() {
     const block = anns.append("div").attr("class", type + "_comments");
 
-    writeInstruction(msg['instruction_comments'], 'comments');
+    writeInstruction(msg["instruction_comments"], "comments");
 
-    // no_sense_message = anns.append('div')
-    //     .attr('class', 'alert alert-warning text-center')
-    //     .attr('role', 'alert')
+    // no_sense_message = anns.append("div")
+    //     .attr("class", "alert alert-warning text-center")
+    //     .attr("role", "alert")
     //     .html(msg["no_sense_message"]);
 
     inputtext = block.append("div").attr("class", "row")
@@ -874,22 +868,22 @@ function addComments() {
         .attr("class", "form-control")
         .attr("id", function (d) { return (type + toClassify.indexOf(d.id) + "_comments"); })
         .attr("name", "comments")
-        .attr('autocomplete', 'on')
+        .attr("autocomplete", "on")
         .attr("placeholder", msg["comments_placeholder"])
         .attr("aria-label", "Comments")
-        .property('value', function () {
-            var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
-            return (d3.keys(text[type][here]).indexOf('comments') !== -1 ? text[type][here]['comments'] : null);
+        .property("value", function () {
+            var here = d3.select(this.parentNode.parentNode).attr("token_id");
+            return (d3.keys(text[type][here]).indexOf("comments") !== -1 ? text[type][here]["comments"] : null);
         })
 
     // control when comments change
-    $(document).on('change', 'input[name="comments"]', function () {
-        var analized = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
-        var answer = d3.select(this).property('value');
+    $(document).on("change", "input[name='comments']", function () {
+        var analized = d3.select(this.parentNode.parentNode).attr("token_id");
+        var answer = d3.select(this).property("value");
         if (d3.keys(text[type]).indexOf(analized) === -1) {
             text[type][analized] = {};
         }
-        text[type][analized]['comments'] = answer;
+        text[type][analized]["comments"] = answer;
 
         // displayNoSense();
         updateTargetColor();
@@ -903,20 +897,20 @@ function addNoneTag(variable) {
     var x = variable.slice(0)
     x.push(
         {
-            'code': msg['no_sense_code'],
-            'label': msg['no_sense_label']
+            "code": msg["no_sense_code"],
+            "label": msg["no_sense_label"]
         }
     );
     return (x);
 }
 
-function updateTargetColor(t) {
-    d3.select("#" + msg['tab_1']).selectAll("p.text-sm-center")
+function updateTargetColor() {
+    d3.select("#" + msg["tab_1"]).selectAll("p.text-sm-center")
         .style("color", function (d) {
             if (!hasSense(d.id, type)) {
-                return ('#000000');
+                return ("#000000");
             } else if (!isDone(d.id, type)) {
-                return ('#ef8a62');
+                return ("#ef8a62");
             } else { return ("#4daf4a") }
         });
 }
@@ -924,21 +918,21 @@ function updateTargetColor(t) {
 // Update display of reminder to annotate cues
 function displayReminder() {
     reminder.style("display", function (d) {
-        var wantCues = selectedVariables.indexOf('cues') !== -1;
+        var wantCues = selectedVariables.indexOf("cues") !== -1;
         var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         var needCues = d3.keys(text[type]).indexOf(here) === -1 ||
-            d3.keys(text[type][here]).indexOf('cues') === -1 ||
-            text[type][here]['cues'].length === 0;
-        return (wantCues && needCues ? 'block' : 'none');
+            d3.keys(text[type][here]).indexOf("cues") === -1 ||
+            text[type][here]["cues"].length === 0;
+        return (wantCues && needCues ? "block" : "none");
     });
 
     no_cues_conf.style("display", function (d) {
-        var wantCues = selectedVariables.indexOf('cues') !== -1;
+        var wantCues = selectedVariables.indexOf("cues") !== -1;
         var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         var noCues = d3.keys(text[type]).indexOf(here) !== -1 &&
-            d3.keys(text[type][here]).indexOf('cues') !== -1 &&
-            text[type][here]['cues'].indexOf('none') === 0;
-        return (wantCues && noCues ? 'block' : 'none');
+            d3.keys(text[type][here]).indexOf("cues") !== -1 &&
+            text[type][here]["cues"].indexOf("none") === 0;
+        return (wantCues && noCues ? "block" : "none");
     });
 }
 
@@ -951,8 +945,8 @@ function ableAnns() {
         return (d3.keys(text[type]).indexOf(d.id) > -1 ? null : true);
     });
     cues.selectAll("label").classed("active", function (d) {
-        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr('token_id');
-        var chosen = hasSense(here, type) && text[type][here]['cues'].indexOf(d.index) > -1;
+        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+        var chosen = hasSense(here, type) && text[type][here]["cues"].indexOf(d.index) > -1;
         return (chosen ? true : null);
     })
 
@@ -963,20 +957,20 @@ function ableAnns() {
         });
 }
 
-// Update display of reminder to comment when sense is 'none'
+// Update display of reminder to comment when sense is "none"
 function displayNoSense() {
     no_sense_message.style("display", function (d) {
         var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
         return (hasSense(here, type) &&
-            text[type][here]['sense'] == msg['no_sense_code'] &&
-            d3.keys(text[type][here]).indexOf('comments') == -1 ? 'block' : 'none');
+            text[type][here]["sense"] == msg["no_sense_code"] &&
+            d3.keys(text[type][here]).indexOf("comments") == -1 ? "block" : "none");
     });
 }
 
 // update display of concordances
 function displayConc() {
-    conc.style('display', function (d) {
-        return (toClassify.indexOf(d.id) == viewing ? 'block' : 'none');
+    conc.style("display", function (d) {
+        return (toClassify.indexOf(d.id) == viewing ? "block" : "none");
     });
 }
 
@@ -984,7 +978,7 @@ function displayConc() {
 function checkType() {
     d3.select("#typeSelection").selectAll("label")
         .html(function (d) {
-            return (checkAchievements(d) == 'done' ? d + ' <i class="fas fa-check"></i>' : d);
+            return (checkAchievements(d) == "done" ? d + " <i class='fas fa-check'></i>" : d);
         })
         .append("input")
         .attr("type", "radio")
@@ -1009,7 +1003,7 @@ function colorStars(varName) {
 }
 
 function offerTypes(selectedTypes) {
-    // selectedTypes = d3.keys(this_user['tokens']); // tailored to this user
+    // selectedTypes = d3.keys(this_user["tokens"]); // tailored to this user
     d3.select("#typelist").remove();
 
     const typesel = d3.select("#typeSelection").append("div").attr("id", "typelist");
@@ -1031,7 +1025,7 @@ function offerTypes(selectedTypes) {
 
     // React to changes in the radio buttons
     $(document).on("change", "input[name='type']", function (event) {
-        type = d3.select(this).property('value');
+        type = d3.select(this).property("value");
         showConc();
     });
 
@@ -1043,66 +1037,69 @@ function offerTypes(selectedTypes) {
 
 function userOnClick() {
     Swal.fire({
-        title: msg['username_actions'],
+        title: msg["username_actions"],
         input: "select",
         inputOptions: {
-            change: msg['change_username'],
-            load: msg['load_config'],
-            save: msg['save_config']
+            change: msg["change_username"],
+            load: msg["load_config"],
+            save: msg["save_config"]
         },
-        inputPlaceholder: msg['action_placeholder'],
+        inputPlaceholder: msg["action_placeholder"],
         showCancelButton: true
     }).then((value) => {
-        if (value.value === 'change') {
+        if (value.value === "change") {
             Swal.fire({
-                title: msg['ask_username'],
+                title: msg["ask_username"],
                 input: "text"
             }).then((name) => {
                 if (name) {
                     user = name.value;
                     d3.select(this).text(user);
-                    text['user'] = user;
-                    config['user'] = user;
+                    text["user"] = user;
+                    config["user"] = user;
                 }
             });
-        } else if (value.value === 'load') {
+        } else if (value.value === "load") {
             const config_file = openJSON();
-            config = JSON.parse(fs.readFileSync(config_file[0]));
-            user = config['user'];
-            selectedVariables = config['variables'];
-            config['types'].forEach(function (t) {
-                types[t['name']] = d3.tsvParse(fs.readFileSync(t['path'], options = { encoding: 'utf-8' }));
+            Object.assign(config, JSON.parse(fs.readFileSync(config_file[0])));
+            console.log(config)
+            user = config["user"];
+            d3.select(this).text(user);
+            config["types"].forEach(function (t) {
+                types[t["name"]] = d3.tsvParse(fs.readFileSync(t["path"], options = { encoding: "utf-8" }));
             });
-            config['personalized_variables'].forEach(function (v) {
-                let varType = 'categorical';
+            config["personalized_variables"].forEach(function (v) {
+                let varType;
                 if (v["path"] === "numerical") {
-                    varType = 'numerical';
+                    varType = "numerical";
                     personalizedVariables[v["variable"]] = {
-                        "type": "numerical",
+                        "type": varType,
                         "hasAttributes": v["hasAttributes"]
                     }
                 } else {
                     const content = JSON.parse(fs.readFileSync(v["path"]));
                     const hasAttributes = d3.keys(content).indexOf("hasAttributes") === -1 ? v["hasAttributes"] : content["hasAttributes"];
                     const values = d3.keys(content).indexOf("values") === -1 ? content : content["values"];
+                    varType = "categorical"
                     personalizedVariables[v["variable"]] = {
-                        "type": "categorical",
+                        "type": varType,
                         "values": values,
                         "hasAttributes": hasAttributes
                     }
                 }
-                // personalizedVariables[v['variable']] = v['path'] === 'numerical' ? 'numerical' : JSON.parse(fs.readFileSync(v['path']));
+                // personalizedVariables[v["variable"]] = v["path"] === "numerical" ? "numerical" : JSON.parse(fs.readFileSync(v["path"]));
                 variables.push({
-                    code: v['variable'], label: v['variable'][0].toUpperCase() + v['variable'].substr(1).toLowerCase(),
+                    code: v["variable"],
+                    label: v["variable"][0].toUpperCase() + v["variable"].substr(1).toLowerCase(),
                     type: varType
                 });
             });
             offerTypes(d3.keys(types));
+            config["variables"].forEach(loadVars);
             offerVariables(variables);
-
-            console.log(config);
             //   loadConfigFile();
-        } else if (value.value === 'save') {
+        } else if (value.value === "save") {
+            config["variables"] = selectedVariables;            
             downloadJSON(config, "config");
         }
     });
@@ -1111,7 +1108,7 @@ function userOnClick() {
 
 // Check if all the tokens of a type have been assigned with senses
 function allSenses(t) {
-    // return (d3.keys(text[t]).length === this_user['tokens'][t].length);
+    // return (d3.keys(text[t]).length === this_user["tokens"][t].length);
     return (d3.keys(text[t]).length === types[t].length);
 }
 
@@ -1123,11 +1120,11 @@ function hasSense(token, t) {
 // Check if the full work is done
 function isDone(token, t) {
     const currentVariables = selectedVariables.filter(function (v) {
-        return (v !== 'comments' && d3.keys(text[t][token]).indexOf(v) !== -1);
+        return (v !== "comments" && d3.keys(text[t][token]).indexOf(v) !== -1);
     });
-    // var has_cues = text[t][token_id]['cues'].length > 0;
-    // var has_conf = d3.keys(text[t][token_id]).indexOf('confidence') > -1;
-    // var has_full_sense = text[t][token_id]['sense'] != msg['no_sense_code'] || d3.keys(text[t][token_id]).indexOf('comments') > -1;
+    // var has_cues = text[t][token_id]["cues"].length > 0;
+    // var has_conf = d3.keys(text[t][token_id]).indexOf("confidence") > -1;
+    // var has_full_sense = text[t][token_id]["sense"] != msg["no_sense_code"] || d3.keys(text[t][token_id]).indexOf("comments") > -1;
     return (currentVariables.length === selectedVariables.length - 1);
 }
 
@@ -1137,11 +1134,11 @@ function checkAchievements(t) {
     const doneTokens = goal.filter(function (d) { return (hasSense(d, t) && isDone(d, t)); });
 
     if (startedTokens.length == Math.ceil(goal.length * 3 / 5)) {
-        return ('halfdone');
+        return ("halfdone");
     } else if (startedTokens.length == goal.length && doneTokens.length === goal.length) {
-        return ('done');
+        return ("done");
     } else {
-        return ('notdone');
+        return ("notdone");
     }
 }
 
@@ -1151,11 +1148,11 @@ function announceAchievement() {
     var selectedTypes = d3.keys(types);
     var message, congrats, timer = 0;
 
-    if (status == 'done' && announced[type] != 'done') {
+    if (status == "done" && announced[type] != "done") {
         congrats = msg["congratulations"];
         checkType();
         full_types = selectedTypes.filter(function (d) {
-            return (checkAchievements(d) == 'done');
+            return (checkAchievements(d) == "done");
         });
         if (full_types.length == selectedTypes.length) {
             message = msg["all_done_message"];
@@ -1164,7 +1161,7 @@ function announceAchievement() {
             message = msg["type_done_message"][0] + type + msg["type_done_message"][1];
             timer = 1000;
         }
-    } else if (status == 'halfdone' && announced[type] != 'halfdone') {
+    } else if (status == "halfdone" && announced[type] != "halfdone") {
         congrats = msg["encouragement"];
         // message = "You are almost done with <em>" + type + "</em>!"
         message = msg["almost_done_message"][0] + type + msg["almost_done_message"][1];
@@ -1187,35 +1184,45 @@ function announceAchievement() {
     }
 }
 
-function createTsv(text, concordance) {
-    const annotations = d3.keys(text).filter(function (d) { return typeof text[d] == 'object' });
-    var outputCols = ['id', 'left', 'target', 'right']
-    selectedVariables.forEach(function (x) { outputCols.push(x); });
-    var output = annotations.map(function (a) {
+function createTsv(text, types) {
+    const annotations = d3.keys(text).filter(function (d) { return typeof text[d] === "object" });
+    const varNames = [...selectedVariables];
+    d3.keys(personalizedVariables).forEach(v => {
+        if (selectedVariables.indexOf(v) > -1 && personalizedVariables[v]["hasAttributes"].length > 0) {
+            personalizedVariables[v]["hasAttributes"].forEach(function(y) {
+                varNames.push(y + "_" + v);
+            });
+        }
+    });
+    const colNames = [...types[annotations[0]].columns, ...varNames];
+    const output = annotations.map(function (a) {
+        concordance = types[a];
         // a is the name of a type
         return d3.keys(text[a]).map(function (t) {
             // t is a token_id
-            var res = [t];
+            const res = [t];
             // return concordance.filter(function(d) {return (d.id === t); })[0];
-            ['left', 'target', 'right'].forEach(function (c) {
-                res.push(concordance.filter(function (d) { return (d.id == t); })[0][c]);
+            const concColumns = concordance.columns;
+            _.pull(concColumns, "id");
+            concColumns.forEach(function (c) {
+                res.push(concordance.filter(function (d) { return (d.id === t); })[0][c]);
             });
-            selectedVariables.forEach(function (c) {
+            varNames.forEach(function (c) {
                 // c is a variable
                 res.push(d3.keys(text[a][t]).indexOf(c) === -1 ? "" : text[a][t][c]);
             });
-            console.log(text[a][t]);
-            return (res.join('\t'));
+            return (res.join("\t"));
         })
-            .join('\n');
+            .join("\n");
     })
-        .join('\n');
-    return [outputCols.join('\t'), output].join('\n');
+        .join("\n");
+    return [colNames.join("\t"), output].join("\n");
     // return(output);
 }
 
+
 function saveInLS() { // check if storage is available and store
     if (typeof (Storage) !== "undefined") {
-        localStorage.setItem("annotations-" + text['user'], JSON.stringify(text));
+        localStorage.setItem("annotations-" + text["user"], JSON.stringify(text));
     }
 }

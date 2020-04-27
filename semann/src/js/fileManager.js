@@ -2,7 +2,10 @@ function uploadProgress() {
     const progressFile = openJSON();
     text = JSON.parse(fs.readFileSync(progressFile[0]));
     saved = JSON.stringify(text);
-    showConc();
+    updateTargetColor();
+    const tmp = [...selectedVariables]
+    _.pull(selectedVariables, ...selectedVariables)
+    tmp.forEach(loadVars);
 }
 
 function openJSON() {
@@ -91,7 +94,11 @@ function uploadType() {
 function downloadJSON(data, whatFor) {
     file = dialog.showSaveDialogSync(options = {
         "title":  msg["save"][1] === 'before' ? msg["save"][0] + " " + whatFor : whatFor + " " + msg["save"][0],
-        "defaultPath" : whatFor === 'progress' ? user + ".json" : user + "." + whatFor + ".json"
+        "defaultPath" : whatFor === 'progress' ? user + ".json" : user + "." + whatFor + ".json",
+        "filters": [{
+            name: "JSON",
+            extensions: ["json"]
+        }]
     });
     if (file !== undefined) {
         fs.writeFile(file, JSON.stringify(data), function (err) {
@@ -116,10 +123,14 @@ function downloadJSON(data, whatFor) {
 }
 
 function downloadTSV() {
-    var finalOutput = createTsv(text, types[type]);
+    var finalOutput = createTsv(text, types);
     dialog.showSaveDialog(options = {
         "title":  msg["progress_save"],
-        "defaultPath" : user + ".tsv"
+        "defaultPath" : user + ".tsv",
+        filters: [{
+            name: "TSV",
+            extensions: ["tsv", "txt", "csv"]
+        }]
     }).then((file) => {
         if (file.canceled == false){
             // latest['exported'] = file.filePath;
