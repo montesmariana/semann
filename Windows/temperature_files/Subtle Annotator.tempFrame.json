@@ -1,0 +1,27 @@
+{
+    "type": "categorical",
+    "hasAttributes": [
+        "cues"
+    ],
+    "values": {
+        "temperatureAdjectives": [
+            {
+                "code": "ambient",
+                "label": "Ambient temperature"
+            },
+            {
+                "code": "sensation",
+                "label": "Thermal sensation, feeling"
+            },
+            {
+                "code": "tactile",
+                "label": "Tactile temperature"
+            }
+            ,
+            {
+                "code": "none",
+                "label": "None of the above/I don't know"
+            }
+        ]
+    }
+}

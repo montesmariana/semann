@@ -1,0 +1,25 @@
+{
+    "user": "Subtle Annotator",
+    "temperatureAdjectives": {
+        "hot/j/fic_1963_23797/3593": {
+            "tempFrame": "ambient",
+            "cues_tempFrame": [
+                "R0"
+            ],
+            "sense": "literal"
+        },
+        "hot/j/mag_1845_522615/3232": {
+            "tempFrame": "none",
+            "cues_tempFrame": [
+                "none"
+            ]
+        },
+        "cold/j/mag_1845_522615/4947": {
+            "tempFrame": "sensation",
+            "cues_tempFrame": [
+                "R0"
+            ],
+            "sense": "affection"
+        }
+    }
+}

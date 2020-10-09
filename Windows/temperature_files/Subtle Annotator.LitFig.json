@@ -1,0 +1,36 @@
+{
+    "type": "categorical",
+    "hasAttributes": ["cues"],
+    "values": {
+        "temperatureAdjectives": [
+            {
+                "code": "literal",
+                "label": "Physical (perceived) temperature"
+            },
+            {
+                "code": "conflict",
+                "label": "Figurative: (lack of) conflict/anger (e.g. 'heated discussion')"
+            },
+            {
+                "code": "sex",
+                "label": "Figurative: (lack of) sexual attraction/arousal (e.g. 'hot kiss')"
+            },
+            {
+                "code": "affection",
+                "label": "Figurative: (lack of) affection (e.g. 'warm embrace'/'cold stare')"
+            },
+            {
+                "code": "popularity",
+                "label": "Figurative: (lack of) popularity (e.g. 'hot topic')"
+            },
+            {
+                "code": "synaesthesia",
+                "label": "Synaesthesia (e.g. 'warm colors')"
+            },
+            {
+                "code": "other_fig",
+                "label": "Other figurative sense"
+            }
+        ]
+    }
+}

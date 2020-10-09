@@ -63,7 +63,8 @@
         "source" : "Source",
         "your_types" : "Your types: ",
         "variable_selection": "Select a variable",
-        "overall" : "overall"
+        "overall" : "overall",
+        "wrong_pattern" : "Please type a valid variable name"
     },
     "nl" : {
         "title" : "Semantische annotatie",

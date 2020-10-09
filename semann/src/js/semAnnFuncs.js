@@ -9,16 +9,11 @@ function offerVariables(startingVariables) {
         .append("button")
         .attr("class", "dropdown-item var")
         .attr("xlink:href", "#")
-        // .attr("value", function (d) { return (d.code) })
-        .classed("active", function (d) {
-            return (selectedVariables.indexOf(d.code) !== -1);
-        })
-        .text(function (d) { return (d.label) })
+        .classed("active", (d) => (selectedVariables.indexOf(d.code) !== -1))
+        .text( (d) => d.label)
         .on("click", function (d) {
             loadVars(d.code);
-            d3.select(this).classed("active", function (d) {
-                return (selectedVariables.indexOf(d.code) !== -1);
-            });
+            d3.select(this).classed("active", (d) => (selectedVariables.indexOf(d.code) !== -1));
             // if (d3.keys(types).length > 0) {
             //     showAnnotations();
             // }
@@ -52,24 +47,21 @@ function toggleVariable(variable) {
         selectedVariables.push(variable);
         showAnnotations(variable);
         if (checkAttributes) {
-            personalizedVariables[variable]["hasAttributes"].forEach(function (x) {
-                showAnnotations(x, variable);
-            });
+            personalizedVariables[variable]["hasAttributes"].forEach((x) => showAnnotations(x, variable));
+            ableAnns(variable);
         }
     } else {
         _.pull(selectedVariables, variable);
         removeAnnotations(variable);
         if (checkAttributes) {
-            personalizedVariables[variable]["hasAttributes"].forEach(function (x) {
-                removeAnnotations(x + "_" + variable);
-            });
+            personalizedVariables[variable]["hasAttributes"].forEach((x) => removeAnnotations(x + "_" + variable));
         }
     }
 }
 
 function toggleSubvariable(subvariable) {
     const inputOptions = {};
-    variables.forEach(function (d) {
+    variables.forEach((d) => {
         if (d.type !== "default") { inputOptions[d.code] = d.label }
     });
     inputOptions[msg["overall"]] = msg["overall"][0].toUpperCase() + msg["overall"].substr(1).toLowerCase();
@@ -107,13 +99,17 @@ function otherVars() {
         inputPlaceholder: msg["action_placeholder"],
         showCancelButton: true
     }).then((value) => {
-        if (value.value === "categorical") {
-            createCategorical();
-            $("#catModal").modal("show");
-        } else if (value.value === "numerical") {
-            createNumerical();
-        } else if (value.value === "fromFile") {
-            askVars();
+        switch(value.value){
+            case "categorical":
+                createCategorical();
+                $("#catModal").modal("show");
+                break;
+            case "numerical":
+                createNumerical();
+                break;
+            case "fromFile":
+                askVars();
+                break;
         }
     });
 }
@@ -125,6 +121,7 @@ function createCategorical() {
     d3.select("#catVariableBody").selectAll("form").remove();
     d3.select("#catVariableBody").selectAll("div").remove();
     d3.select("#catVariableBody").selectAll("button").remove();
+    d3.select("#saveCategorical").classed("disabled", true);
 
     const selectTitle = d3.select("#catVariableBody").append("form")
         .append("div").attr("class", "form-group");
@@ -133,73 +130,86 @@ function createCategorical() {
         .text(msg["load_variable_title"]);
     selectTitle.append("input").attr("type", "text")
         .attr("class", "form-control")
+        .attr("required", "")
+        .attr("pattern", "[a-zA-Z][a-zA-Z0-9\.]*")
+        .attr("maxlength", 20)
         .attr("id", "catTitle");
+    selectTitle.append("p").attr("id", "catTitleValidate");
+
+    $(document).on("change", "input#catTitle", () => {
+        const isValid = d3.select("#catTitle").property("validity").valid;
+        d3.select("p#catTitleValidate")
+            .text(isValid ? "Looks good!" : d3.select("#catTitle").property("validationMessage"));
+        d3.select("#saveCategorical")
+            .classed("disabled", isValid ? null : true);
+    })
 
     forms = d3.select("#catVariableBody").append("div");
 
+    // if (typesToAnnotate.length === 0) {
+    //     itemsNum = [1];
+    //     addTypeForCat(forms, 1);
 
+    //     d3.select("#saveCategorical").on("click", function () {
+    //         const extras = [];
+    //         d3.selectAll("[name='wantExtras']").each(function () {
+    //             if (d3.select(this).property("checked")) {extras.push(d3.select(this).property("value")); }
+    //         })
+    //         const setVariable = {
+    //             "type": "categorical",
+    //             "hasAttributes": extras,
+    //             "values": {}
+    //         };
+    //         itemsNum.forEach(function (x) {
+    //             const typeName = d3.select("#catType" + x).property("value");
+    //             setVariable["values"][typeName] = valuesNum.map(function (x) {
+    //                 return ({
+    //                     "code": d3.select("#value-" + x).property("value"),
+    //                     "label": d3.select("#label-" + x).property("value"),
+    //                 });
+    //             });
+    //         });
+    //         let varName = d3.select("#catTitle").property("value");
+    //         saveCategorical(varName, setVariable);
+    //     })
+    // } else {
+    itemsNum = typesToAnnotate.map((t) => typesToAnnotate.indexOf(t) + 1);
+    const typeDivs = forms.selectAll("div.addCat")
+        .data(typesToAnnotate).enter()
+        .append("div").attr("class", "addCat");
 
-    if (typesToAnnotate.length === 0) {
-        itemsNum = [1];
-        addTypeForCat(forms, 1);
+    typeDivs.append("h5").text((d) => msg["for_type"] + d);
+    typeDivs.each(fillCategorical);
 
-        d3.select("#saveCategorical").on("click", function () {
+    d3.select("#saveCategorical")
+        .on("click", function () {
             const extras = [];
             d3.selectAll("[name='wantExtras']").each(function () {
-                if (d3.select(this).property("checked")) extras.push(d3.select(this).property("value"));
+                if (d3.select(this).property("checked")) {
+                    extras.push(d3.select(this).property("value"));
+                }
             })
             const setVariable = {
                 "type": "categorical",
                 "hasAttributes": extras,
                 "values": {}
             };
-            itemsNum.forEach(function (x) {
-                const typeName = d3.select("#catType" + x).property("value");
-                setVariable["values"][typeName] = valuesNum.map(function (x) {
-                    return ({
-                        "code": d3.select("#value-" + x).property("value"),
-                        "label": d3.select("#label-" + x).property("value"),
-                    });
-                });
+
+            typesToAnnotate.forEach(function (t) {
+                console.log(t);
+                let maxCats = parseInt(d3.select("div[name='form_" + t + "']").attr("minCats"))
+                setVariable["values"][t] = [];
+                for (let i = 1; i < maxCats+1; i++) {
+                    setVariable["values"][t].push({
+                        "code": d3.select("#value-" + i).property("value"),
+                        "label": d3.select("#label-" + i).property("value"),
+                    })
+                }
             });
-            let varName = d3.select("#catTitle").property("value");
+            var varName = d3.select("#catTitle").property("value");
             saveCategorical(varName, setVariable);
-        })
-    } else {
-        itemsNum = typesToAnnotate.map(function (t) {
-            return (typesToAnnotate.indexOf(t) + 1);
         });
-        const typeDivs = forms.selectAll("div.addCat")
-            .data(typesToAnnotate).enter()
-            .append("div").attr("class", "addCat");
-
-        typeDivs.append("h5").text(function (d) { return (msg["for_type"] + d); });
-        typeDivs.each(fillCategorical);
-
-        d3.select("#saveCategorical")
-            .on("click", function () {
-                const extras = [];
-                d3.selectAll("[name='wantExtras']").each(function () {
-                    if (d3.select(this).property("checked")) extras.push(d3.select(this).property("value"));
-                })
-                const setVariable = {
-                    "type": "categorical",
-                    "hasAttributes": extras,
-                    "values": {}
-                };
-
-                typesToAnnotate.forEach(function (t) {
-                    setVariable["values"][t] = valuesNum.map(function (x) {
-                        return ({
-                            "code": d3.select("#value-" + x).property("value"),
-                            "label": d3.select("#label-" + x).property("value"),
-                        });
-                    });
-                });
-                var varName = d3.select("#catTitle").property("value");
-                saveCategorical(varName, setVariable);
-            });
-    }
+    // }
 
 
 
@@ -240,9 +250,7 @@ function createCategorical() {
 }
 
 function variableAvailable(name) {
-    return (variables.filter(function (v) {
-        return (v.code === name);
-    }).length === 0);
+    return (variables.filter((v) => v.code === name).length === 0);
 }
 
 function saveCategorical(varName, content) {
@@ -258,9 +266,7 @@ function saveCategorical(varName, content) {
         if (fname !== undefined) {
             addPersonalizedVariable(varName, content, fname);
             showAnnotations(varName);
-            content["hasAttributes"].forEach(function (x) {
-                showAnnotations(x, varName);
-            });
+            content["hasAttributes"].forEach((x) => showAnnotations(x, varName));
         }
         $("#catModal").modal("hide");
     }
@@ -282,19 +288,22 @@ function addTypeForCat(forms, value) {
 }
 
 function fillCategorical(p) {
-    const f = d3.select(this).append("div");
-    valuesNum = [1, 2];
+    const f = d3.select(this).append("div")
+        .attr("name", (d) => "form_" + d)
+        .attr("minCats", 2);
+    let minCats = f.attr("minCats");
 
-    addCategorical(f, valuesNum[0]);
-    addCategorical(f, valuesNum[1]);
+    addCategorical(f, 1);
+    addCategorical(f, 2);
 
     d3.select(this).append("button")
         .attr("type", "button")
         .attr("class", "btn btn-success m-2")
         .html("<i class='fas fa-plus'></i> " + msg["add_value"])
         .on("click", function () {
-            valuesNum.push(valuesNum[valuesNum.length - 1] + 1);
-            addCategorical(f, valuesNum[valuesNum.length - 1]);
+            minCats = parseInt(f.attr("minCats")) + 1;
+            f.attr("minCats", minCats);
+            addCategorical(f, minCats);
         })
 
     function addCategorical(form, value) {
@@ -303,19 +312,19 @@ function fillCategorical(p) {
         const ffValue = ff.append("div").attr("class", "col-6");
 
         ffLabel.append("label").attr("class", "px-2")
-            .attr("for", function (d) { return ("label-" + value); })
+            .attr("for", "label-" + value)
             .style("font-weight", "bold")
             .text(msg["label"]);
         ffLabel.append("input").attr("type", "text")
             .attr("class", "form-control")
-            .attr("id", function (d) { return ("label-" + value); });
+            .attr("id", "label-" + value);
         ffValue.append("label").attr("class", "px-2")
-            .attr("for", function (d) { return ("value-" + value); })
+            .attr("for", "value-" + value)
             .style("font-weight", "bold")
             .text(msg["value"]);
         ffValue.append("input").attr("type", "text")
             .attr("class", "form-control")
-            .attr("id", function (d) { return ("value-" + value); });
+            .attr("id", "value-" + value);
     }
 }
 
@@ -328,8 +337,10 @@ function createNumerical() {
                 return (msg["load_variable_insist"]);
             } else if (!variableAvailable(value)) {
                 return (msg["variable_exists"]);
+            } else if (!/^[a-zA-Z][a-zA-Z0-9\.]*$/.test(value)) {
+                return (msg["wrong_pattern"]);
             }
-        }
+        } 
     }).then((result) => {
         if (result.value) {
             const content = { "type": "numerical" }
@@ -346,6 +357,8 @@ function askVars() {
         inputValidator: (value) => {
             if (!value) {
                 return (msg["load_variable_insist"]);
+            } else if (!(/^[a-zA-Z][a-zA-Z0-9\.]*$/.test(value))) {
+                return (msg["wrong_pattern"]);
             } else if (!variableAvailable(value)) {
                 return (msg["variable_exists"]);
             }
@@ -354,11 +367,11 @@ function askVars() {
         if (result.value) {
             let varFile = openJSON();
             const fileContents = JSON.parse(fs.readFileSync(varFile[0]));
-            if (d3.keys(fileContents).indexOf("hasAttributes") > -1) {
+            if (d3.keys(fileContents).indexOf("hasAttributes") !== -1) {
                 const contents = fileContents;
                 addPersonalizedVariable(result.value, contents, varFile[0]);
                 showAnnotations(result.value);
-                contents["hasAttributes"].forEach(function (x) { return (showAnnotations(x, result.value)); });
+                contents["hasAttributes"].forEach((x) => showAnnotations(x, result.value));
             } else {
                 const contents = { "type": "categorical", "values": fileContents, "hasAttributes": [] };
                 addPersonalizedVariable(result.value, contents, varFile[0]);
@@ -404,13 +417,11 @@ function showConc() {
         .attr("role", "tablist");
 
     var concordances = types[type];
-    toClassify = d3.map(concordances, function (d) { return (d.id); }).keys();
+    toClassify = d3.map(concordances, (d) => d.id).keys();
     viewing = 0;
     var overview, buttons;
 
-    d3.keys(types).forEach(function (d) {
-        announced[d] = checkAchievements(d);
-    });
+    d3.keys(types).forEach((d) => {announced[d] = checkAchievements(d)});
 
     if (d3.keys(text).indexOf(type) === -1) {
         text[type] = {};
@@ -426,24 +437,24 @@ function showConc() {
         .attr("class", "nav-item")
         .append("a")
         .attr("class", "nav-link")
-        .attr("id", function (d) { return (d + "-tab"); })
-        .classed("active", function (d) { return (d == msg["tab_1"]); })
+        .attr("id", (d) => (d + "-tab"))
+        .classed("active", (d) => (d == msg["tab_1"]))
         .attr("data-toggle", "tab")
-        .attr("href", function (d) { return ("#" + d); })
+        .attr("href", (d) => ("#" + d))
         .attr("role", "tab")
-        .attr("aria-controls", function (d) { return (d); })
-        .text(function (d) { return (d.toUpperCase()); });
+        .attr("aria-controls", (d) => d)
+        .text((d) => d.toUpperCase());
 
     workspace.append("div").attr("class", "tab-content")
         .selectAll("div")
         .data([msg["tab_1"], msg["tab_2"]]).enter()
         .append("div")
         .attr("class", "tab-pane")
-        .attr("id", function (d) { return (d); })
-        .classed("active", function (d) { return (d == msg["tab_1"]); })
+        .attr("id", (d) => d)
+        .classed("active", (d) => (d == msg["tab_1"]))
         .attr("width", "100vp")
         .attr("role", "tabpanel")
-        .attr("aria-labelledby", function (d) { return (d + "-tab"); });
+        .attr("aria-labelledby", (d) => (d + "-tab"));
 
     // OVERVIEW TAB
 
@@ -458,17 +469,17 @@ function showConc() {
     overview.selectAll("div")
         .data(concordances).enter()
         .append("div").attr("class", "row no-gutters justify-content-sm-center")
-        .each(function (d) {
+        .each(function () {
             const line = d3.select(this);
 
             line.append("div").attr("class", "col-md-5")
                 .append("p").attr("class", "text-sm-right")
-                .text(function (d) { return (d.left); });
+                .text((d) => d.left);
 
             line.append("div").attr("class", "col-md-2 px-0")
                 .append("p").attr("class", "text-sm-center")
                 .style("font-weight", "bold")
-                .text(function (d) { return (d.target); })
+                .text((d) => d.target)
                 .style("cursor", "pointer")
                 .on("click", function (d) {
                     tabs.selectAll(".nav-link").classed("active", function () {
@@ -485,7 +496,7 @@ function showConc() {
 
             line.append("div").attr("class", "col-md-5")
                 .append("p").attr("class", "text-sm-left")
-                .text(function (d) { return (d.right); });
+                .text((d) => d.right);
         });
 
 
@@ -496,7 +507,7 @@ function showConc() {
         .append("div").attr("class", "col-sm-12").selectAll("div")
         .data(concordances).enter()
         .append("div")
-        .attr("token_id", function (d) { return (d.id); }); // The "token_id" attribute makes it available for nested elements
+        .attr("token_id", (d) => d.id); // The "token_id" attribute makes it available for nested elements
 
     displayConc(); // displays the concordance that corresponds to the current token
 
@@ -506,7 +517,7 @@ function showConc() {
         .style("color", "#696969")
         .html(msg["before_concordance"]);
 
-    conc.each(function (d) {
+    conc.each(function () {
         var line = d3.select(this);
         line.append("p")
             .attr("class", "text-center")
@@ -654,15 +665,15 @@ function addCategorical(variable) {
             var chosen = d3.keys(text[type][here]).indexOf(variable) !== -1 && text[type][here][variable] === d.code;
             return (chosen ? true : null);
         })
-        .html(function (d) { return (d.label); })
+        .html((d) => d.label)
         .append("input")
         .attr("type", "radio")
         .attr("autocomplete", "off")
         .attr("name", type + "_" + variable)
-        .attr("value", function (d) { return (d.code) });
+        .attr("value", (d) => d.code);
 
     // Control de results when var changes
-    $(document).on("change", "input[name='" + type + "_" + variable + "']", function (event) {
+    $(document).on("change", "input[name='" + type + "_" + variable + "']", function () {
         var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
         var answer = d3.select(this).attr("value");
         // register data
@@ -676,9 +687,9 @@ function addCategorical(variable) {
 
         updateTargetColor();
         // colorStars();
-        // ableAnns();
+        ableAnns(variable);
         // displayNoSense();
-        // displayReminder();
+        displayReminder(type, "cues_"+variable);
         // saveInLS();
     });
 
@@ -709,7 +720,7 @@ function addConfidence(supravariable = null) {
         .append("input").attr("type", "radio")
         .attr("autocomplete", "off")
         .attr("name", type + "_" + varName)
-        .attr("value", function (d) { return (d); });
+        .attr("value", (d) => d);
 
     colorStars(varName);
 
@@ -753,23 +764,18 @@ function addCues(supravariable = null) {
                 var cwIdx = leftSource.length - i - 1;
                 return ({ "index": "L" + cwIdx.toString(), "cw": d });
             });
-            rightContext = rightSource.map(function (d, i) {
-                return ({ "index": "R" + i.toString(), "cw": d });
-            });
+            rightContext = rightSource.map((d, i) => ({ "index": "R" + i.toString(), "cw": d }));
             halfLine(leftContext);
 
             line.append("span").attr("class", "btn p-0 text-primary")
                 .style("font-weight", "bold")
-                .text(function (d) { return (d.target); });
+                .text((d) => d.target);
 
             halfLine(rightContext);
 
             function halfLine(context) {
                 line.append("span").attr("class", "btn-group-toggle")
                     .attr("data-toggle", "buttons")
-                    // .attr("disabled", function(d) {
-                    //     return(d3.keys(text[type]).indexOf(d.id) > -1 ? null : true);
-                    // })
                     .selectAll("label")
                     .data(context).enter()
                     .append("label").attr("class", "btn btn-cue px-1")
@@ -779,17 +785,19 @@ function addCues(supravariable = null) {
                         var chosen = d3.keys(text[type][here]).indexOf(varName) !== -1 && text[type][here][varName].indexOf(d.index) !== -1;
                         return (chosen ? true : null);
                     })
-                    .text(function (d) { return (d.cw); })
+                    .text((d) => d.cw)
                     .append("input").attr("type", "checkbox")
                     .attr("name", type + counter + "_" + varName)
                     .attr("autocomplete", "off")
-                    .attr("value", function (d) { return (d.index); });
+                    .attr("value", (d) => d.index);
             }
 
         });
 
     // Control of results when the "cues" change
     $("." + type + "_" + varName).on("change", "input[name='" + type + counter + "_" + varName + "']", function () {
+        console.log(selectedVariables)
+        console.log(personalizedVariables)
         var analized = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
         console.log("Token_id: " + analized);
         var answer = d3.select(this).attr("value");
@@ -816,23 +824,25 @@ function addCues(supravariable = null) {
         console.log(text[type][analized]);
 
         updateTargetColor();
-        displayReminder();
+        displayReminder(type, varName);
         saveInLS();
     });
 
     // HERE we add the reminder to add cues if the sense is annotated but there are not cues
     reminder = block.append("div")
         .attr("class", "alert alert-warning text-center")
+        .attr("name", "reminder_" + type + "_" + varName)
         .attr("role", "alert")
         .html(msg["reminder"]);
 
     // and a confirmation if they have selected "here"
-    no_cues_conf = block.append("div")
+    block.append("div")
         .attr("class", "alert alert-success text-center")
+        .attr("name", "noCues_" + type + "_" + varName)
         .attr("role", "alert")
         .html(msg["no_cues_conf"]);
 
-    displayReminder();
+    displayReminder(type, varName);
 
     // Use the <a> in the reminder message to select "no cues" as option
     reminder.select("#no-cues-selected")
@@ -843,7 +853,7 @@ function addCues(supravariable = null) {
                 text[type][d.id] = {};
             }
             text[type][d.id][varName] = ["none"];
-            displayReminder();
+            displayReminder(type, varName);
             updateTargetColor();
         });
 
@@ -862,11 +872,11 @@ function addComments() {
 
     inputtext = block.append("div").attr("class", "row")
         .append("div").attr("class", "col")
-        .attr("token_id", function (d) { return (d.id); });
+        .attr("token_id", (d) => d.id);
 
     inputtext.append("div").append("input")
         .attr("class", "form-control")
-        .attr("id", function (d) { return (type + toClassify.indexOf(d.id) + "_comments"); })
+        .attr("id", (d) => (type + toClassify.indexOf(d.id) + "_comments"))
         .attr("name", "comments")
         .attr("autocomplete", "on")
         .attr("placeholder", msg["comments_placeholder"])
@@ -916,45 +926,46 @@ function updateTargetColor() {
 }
 
 // Update display of reminder to annotate cues
-function displayReminder() {
-    reminder.style("display", function (d) {
-        var wantCues = selectedVariables.indexOf("cues") !== -1;
-        var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
-        var needCues = d3.keys(text[type]).indexOf(here) === -1 ||
-            d3.keys(text[type][here]).indexOf("cues") === -1 ||
-            text[type][here]["cues"].length === 0;
-        return (wantCues && needCues ? "block" : "none");
-    });
+function displayReminder(type, varName) {
+    const wantCues = varName === "cues" ? selectedVariables.indexOf(varName) !== -1 : personalizedVariables[varName.slice(5)]["hasAttributes"].indexOf("cues") !== -1;
+    const suffix = type + "_" + varName
+    d3.selectAll("div[name='reminder_" + suffix + "']")
+        .style("display", function () {
+            const here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
+            const noNeedCues = d3.keys(text[type]).indexOf(here) !== -1 && d3.keys(text[type][here]).indexOf(varName) !== -1 && text[type][here][varName].length > 0;
+            const cuesDisabled = varName !== "cues" && d3.keys(text[type]).indexOf(here) === -1
+            return (!wantCues || (noNeedCues || cuesDisabled) ? "none" : "block");
+        });
 
-    no_cues_conf.style("display", function (d) {
-        var wantCues = selectedVariables.indexOf("cues") !== -1;
-        var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
-        var noCues = d3.keys(text[type]).indexOf(here) !== -1 &&
-            d3.keys(text[type][here]).indexOf("cues") !== -1 &&
-            text[type][here]["cues"].indexOf("none") === 0;
-        return (wantCues && noCues ? "block" : "none");
-    });
+    d3.selectAll("div[name='noCues_" + suffix + "']")
+        .style("display", function () {
+            var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
+            var noCues = d3.keys(text[type]).indexOf(here) !== -1 &&
+                d3.keys(text[type][here]).indexOf(varName) !== -1 &&
+                text[type][here][varName].indexOf("none") === 0;
+            return (wantCues && noCues ? "block" : "none");
+        });
 }
 
-function ableAnns() {
-    conf.attr("disabled", function () {
-        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode).attr("token_id");
-        return (hasSense(here, type) ? null : true);
-    });
-    cues.selectAll("span").attr("disabled", function (d) {
-        return (d3.keys(text[type]).indexOf(d.id) > -1 ? null : true);
-    });
-    cues.selectAll("label").classed("active", function (d) {
-        var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
-        var chosen = hasSense(here, type) && text[type][here]["cues"].indexOf(d.index) > -1;
-        return (chosen ? true : null);
-    })
+function ableAnns(supravariable) {
+    
+    if (personalizedVariables[supravariable]["hasAttributes"].indexOf("confidence") !== -1) {
+        d3.selectAll("." + type + "_confidence_" + supravariable)
+            .selectAll(".btn-group-toggle")
+            .attr("disabled", function () {
+                var here = d3.select(this.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+                return (d3.keys(text[type][here]).indexOf(supravariable) !== -1 ? null : true);
+            });
+    }
 
-    inputtext.selectAll("input")
-        .attr("disabled", function () {
-            var here = d3.select(this.parentNode.parentNode.parentNode).attr("token_id");
-            return (hasSense(here, type) ? null : true);
-        });
+    if (personalizedVariables[supravariable]["hasAttributes"].indexOf("cues") !== -1) {
+        d3.selectAll("." + type + "_cues_" + supravariable)
+            .selectAll(".btn-group-toggle")
+            .classed("disabled", function () {
+                var here = d3.select(this.parentNode.parentNode.parentNode.parentNode.parentNode).attr("token_id");
+                return (d3.keys(text[type][here]).indexOf(supravariable) !== -1 ? null : true);
+            });
+    }
 }
 
 // Update display of reminder to comment when sense is "none"
@@ -969,22 +980,18 @@ function displayNoSense() {
 
 // update display of concordances
 function displayConc() {
-    conc.style("display", function (d) {
-        return (toClassify.indexOf(d.id) == viewing ? "block" : "none");
-    });
+    conc.style("display", (d) => (toClassify.indexOf(d.id) == viewing ? "block" : "none"));
 }
 
 // show that a type is done
 function checkType() {
     d3.select("#typeSelection").selectAll("label")
-        .html(function (d) {
-            return (checkAchievements(d) == "done" ? d + " <i class='fas fa-check'></i>" : d);
-        })
+        .html((d) => (checkAchievements(d) == "done" ? d + " <i class='fas fa-check'></i>" : d))
         .append("input")
         .attr("type", "radio")
         .attr("autocomplete", "off")
         .attr("name", "type")
-        .attr("value", function (d) { return (d) });
+        .attr("value", (d) => d);
 }
 
 // update color of confidence stars
@@ -1015,16 +1022,16 @@ function offerTypes(selectedTypes) {
         .data(selectedTypes).enter()
         .append("label")
         .attr("class", "btn shadow-sm btn-success mt-1")
-        .classed("active", function (d) { return (selectedTypes.indexOf(d) == 0); })
-        .html(function (d) { return (d); })
+        .classed("active", (d) => (selectedTypes.indexOf(d) == 0))
+        .html((d) => d)
         .append("input")
         .attr("type", "radio")
         .attr("autocomplete", "off")
         .attr("name", "type")
-        .attr("value", function (d) { return (d) });
+        .attr("value", (d) => d);
 
     // React to changes in the radio buttons
-    $(document).on("change", "input[name='type']", function (event) {
+    $(document).on("change", "input[name='type']", function () {
         type = d3.select(this).property("value");
         showConc();
     });
@@ -1064,6 +1071,7 @@ function userOnClick() {
             Object.assign(config, JSON.parse(fs.readFileSync(config_file[0])));
             console.log(config)
             user = config["user"];
+            text["user"] = user;
             d3.select(this).text(user);
             config["types"].forEach(function (t) {
                 types[t["name"]] = d3.tsvParse(fs.readFileSync(t["path"], options = { encoding: "utf-8" }));
@@ -1119,9 +1127,7 @@ function hasSense(token, t) {
 
 // Check if the full work is done
 function isDone(token, t) {
-    const currentVariables = selectedVariables.filter(function (v) {
-        return (v !== "comments" && d3.keys(text[t][token]).indexOf(v) !== -1);
-    });
+    const currentVariables = selectedVariables.filter( (v) => (v !== "comments" && d3.keys(text[t][token]).indexOf(v) !== -1));
     // var has_cues = text[t][token_id]["cues"].length > 0;
     // var has_conf = d3.keys(text[t][token_id]).indexOf("confidence") > -1;
     // var has_full_sense = text[t][token_id]["sense"] != msg["no_sense_code"] || d3.keys(text[t][token_id]).indexOf("comments") > -1;
@@ -1130,8 +1136,8 @@ function isDone(token, t) {
 
 function checkAchievements(t) {
     const goal = toClassify;
-    const startedTokens = goal.filter(function (d) { return (hasSense(d, t)); });
-    const doneTokens = goal.filter(function (d) { return (hasSense(d, t) && isDone(d, t)); });
+    const startedTokens = goal.filter((d) => hasSense(d, t));
+    const doneTokens = goal.filter((d) => (hasSense(d, t) && isDone(d, t)));
 
     if (startedTokens.length == Math.ceil(goal.length * 3 / 5)) {
         return ("halfdone");
@@ -1151,9 +1157,7 @@ function announceAchievement() {
     if (status == "done" && announced[type] != "done") {
         congrats = msg["congratulations"];
         checkType();
-        full_types = selectedTypes.filter(function (d) {
-            return (checkAchievements(d) == "done");
-        });
+        full_types = selectedTypes.filter((d) => (checkAchievements(d) == "done"));
         if (full_types.length == selectedTypes.length) {
             message = msg["all_done_message"];
             timer = 2000;
@@ -1185,13 +1189,11 @@ function announceAchievement() {
 }
 
 function createTsv(text, types) {
-    const annotations = d3.keys(text).filter(function (d) { return typeof text[d] === "object" });
+    const annotations = d3.keys(text).filter((d) => typeof text[d] === "object" );
     const varNames = [...selectedVariables];
     d3.keys(personalizedVariables).forEach(v => {
         if (selectedVariables.indexOf(v) > -1 && personalizedVariables[v]["hasAttributes"].length > 0) {
-            personalizedVariables[v]["hasAttributes"].forEach(function(y) {
-                varNames.push(y + "_" + v);
-            });
+            personalizedVariables[v]["hasAttributes"].forEach((y) => varNames.push(y + "_" + v));
         }
     });
     const colNames = [...types[annotations[0]].columns, ...varNames];
@@ -1201,16 +1203,10 @@ function createTsv(text, types) {
         return d3.keys(text[a]).map(function (t) {
             // t is a token_id
             const res = [t];
-            // return concordance.filter(function(d) {return (d.id === t); })[0];
             const concColumns = concordance.columns;
             _.pull(concColumns, "id");
-            concColumns.forEach(function (c) {
-                res.push(concordance.filter(function (d) { return (d.id === t); })[0][c]);
-            });
-            varNames.forEach(function (c) {
-                // c is a variable
-                res.push(d3.keys(text[a][t]).indexOf(c) === -1 ? "" : text[a][t][c]);
-            });
+            concColumns.forEach((c) => res.push(concordance.filter((d) => d.id === t)[0][c]));
+            varNames.forEach((c) => res.push(d3.keys(text[a][t]).indexOf(c) === -1 ? "" : text[a][t][c]));
             return (res.join("\t"));
         })
             .join("\n");
