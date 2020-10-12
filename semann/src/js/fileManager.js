@@ -21,10 +21,10 @@ function openJSON() {
 function uploadType() {
     const typeFiles = dialog.showOpenDialogSync(options = {
         title: msg['upload_files'],
-        filters: [{
-            name: "Tab separated values",
-            extensions: ["tsv"]
-        }],
+        filters: [
+            {name: "Tab separated values", extensions: ["tsv"]},
+            {name: "All Files", extensions: ["*"]}
+        ],
         properties: ['multiSelections']
     });
     if (typeFiles !== undefined) {
