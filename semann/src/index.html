@@ -44,41 +44,45 @@
 </head>
 
 <body>
-  <div class="container">
-    <div class="row justify-content-sm-center pt-5">
+  <div class="container-fluid" style = "max-width: 90%;">
+    <div class="row justify-content-sm-center pt-5 mx-5">
       <h1></h1>
     </div>
-    <div class="row justify-content-center">
-      <div class="col-5 offset-4">
-        <p id="welcomeUser"></p>
+    <div class="row justify-content-center mx-5">
+      <div class="col-6 offset-3">
+        <p id="welcomeUser" style="font-size: large; text-align: center;"></p>
       </div>
       <div class="col-1 offset-2">
-        <div class="btn-group btn-group-toggle m-1" id = "language" data-toggle="buttons">
-          
-        </div>
+        <div class="btn-group btn-group-toggle m-1" id = "language" data-toggle="buttons"></div>
       </div>
     </div>
-    <div class="row justify-content-between">
+    <hr>
+    <div class="row justify-content-between mx-5">
       <!-- <div class="btn-group btn-group-toggle" data-toggle="buttons" id="langs"></div> -->
       <div class="col-auto">
-        <div class="btn-group">
-          <!-- <button type="button" class="btn shadow-sm btn-success"><a id="loadconfig"></a></button> -->
-          <button type="button" class="btn shadow-sm btn-muted"><a id="uploadConcordances"></a></button>
-          <div class='btn-group'>
-            <button type="button" class="btn shadow-sm btn-success dropdown-toggle" data-toggle="dropdown" id="uploadVarsMenu"></button>
-            <div class="dropdown-menu" id="uploadVars"></div>
+        <div class="row justify-content-center"><h2 id="newData"></h2></div>
+          <div class="row justify-content-center">
+            <div class="btn-group">
+            <button type="button" class="btn shadow-sm btn-muted"><a id="uploadConcordances"></a></button>
+            <div class='btn-group'>
+              <button type="button" class="btn shadow-sm btn-success dropdown-toggle" data-toggle="dropdown" id="uploadVarsMenu"></button>
+              <div class="dropdown-menu" id="uploadVars"></div>
+            </div>
           </div>
         </div>
       </div>
       <div class="col-auto">
-        <div class='btn-group'>
-          <button type="button" class="btn shadow-sm btn-muted"><a id="uploadProgress"></a></button>
-          <button type="button" class="btn shadow-sm btn-primary"><a id="download"></a></button>
-          <button type="button" class="btn shadow-sm btn-primary"><a id="export"></a></button>
+        <div class="row justify-content-center"><h2 id="progress"></h2></div>
+        <div class="row justify-content-center">
+          <div class='btn-group'>
+            <button type="button" class="btn shadow-sm btn-muted"><a id="uploadProgress"></a></button>
+            <button type="button" class="btn shadow-sm btn-primary"><a id="download"></a></button>
+            <button type="button" class="btn shadow-sm btn-primary"><a id="export"></a></button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="row justify-content-sm-center" id="playground">
+    <div class="row justify-content-sm-center mx-5" id="playground">
       <!-- Begin modal for creation of categorical variable -->
       <div class="modal fade" id="catModal" tabindex="-1" role="dialog" aria-labelledby="categoricalVariable" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -132,10 +136,10 @@
   <script src="js/FileSaver.js" type="text/javascript"></script>
   <script src="js/sweetalert2.min.js"></script>
   <link rel="stylesheet" href="css/sweetalert2.min.css">
-  <script src="js/semAnnVars.js"></script>
-  <script src="js/semAnnFuncs.js"></script>
-  <script src="js/fileManager.js"></script>
-  <script src="js/loadData.js"></script>
+  <script src="src/semAnnVars.js"></script>
+  <script src="src/semAnnFuncs.js"></script>
+  <script src="src/fileManager.js"></script>
+  <script src="src/loadData.js"></script>
 
   <script>if (window.module) module = window.module;</script>
 
