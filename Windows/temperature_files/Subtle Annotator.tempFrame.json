@@ -3,8 +3,7 @@
     "hasAttributes": [
         "cues"
     ],
-    "values": {
-        "temperatureAdjectives": [
+    "values": [
             {
                 "code": "ambient",
                 "label": "Ambient temperature"
@@ -23,5 +22,4 @@
                 "label": "None of the above/I don't know"
             }
         ]
-    }
 }

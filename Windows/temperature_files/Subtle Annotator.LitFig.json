@@ -1,8 +1,7 @@
 {
     "type": "categorical",
     "hasAttributes": ["cues"],
-    "values": {
-        "temperatureAdjectives": [
+    "values": [
             {
                 "code": "literal",
                 "label": "Physical (perceived) temperature"
@@ -32,5 +31,4 @@
                 "label": "Other figurative sense"
             }
         ]
-    }
 }
